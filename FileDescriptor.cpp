@@ -20,9 +20,11 @@ FileDescriptor::FileDescriptor(int fd):
 
 FileDescriptor::FileDescriptor(const FileDescriptor& other):
   mFd(-1) {
-  mFd = dup(other.mFd);
-  if (mFd < 0) {
-    throw std::runtime_error(std::strerror(errno));
+  if (other.mFd >= 0) {
+    mFd = dup(other.mFd);
+    if (mFd < 0) {
+      throw std::runtime_error(std::strerror(errno));
+    }
   }
 }
 
@@ -57,6 +59,9 @@ bool FileDescriptor::isValid() const {
 }
 
 string FileDescriptor::read() const {
+  if (mFd < 0) {
+    throw std::runtime_error("read called on an invalid file descriptor");
+  }
   const int BUFF_SIZE = 4096;
   char buff[BUFF_SIZE];
   ssize_t rc = ::read(mFd, buff, BUFF_SIZE);
@@ -67,6 +72,9 @@ string FileDescriptor::read() const {
 }
 
 void FileDescriptor::write(const string& data) const {
+  if (mFd < 0) {
+    throw std::runtime_error("write called on an invalid file descriptor");
+  }
   const char* buff = data.c_str();
   size_t offset = 0;
   while (offset < data.size()) {
@@ -91,6 +99,10 @@ FileDescriptor FileDescriptor::createCopyOf(int fd) {
 }
 
 void FileDescriptor::Set::add(const FileDescriptor& fd) {
+  if (fd.mFd < 0) {
+    throw std::runtime_error(
+        "Invalid file descriptor cannot be added to a set");
+  }
   fds.insert(fd.mFd);
 }
 
