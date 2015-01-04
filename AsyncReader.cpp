@@ -18,17 +18,6 @@ AsyncReader::AsyncReader():
   mExceptionMessage(),
   mThread() {}
 
-AsyncReader::AsyncReader(const FileDescriptor& fd):
-  mFd(fd),
-  mExitPipe(),
-  mLinesReady(0),
-  mBuffer(),
-  mBufferMutex(),
-  mDataReadyCondition(),
-  mException(false),
-  mExceptionMessage(),
-  mThread(std::bind(&AsyncReader::backgroundThread, this)) {}
-
 AsyncReader::~AsyncReader() {
   if (isRunning()) {
     mExitPipe.getWriteFd().write("X");

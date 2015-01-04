@@ -16,7 +16,6 @@ class AsyncReader {
 public:
 
   AsyncReader();
-  explicit AsyncReader(const FileDescriptor& fd);
   ~AsyncReader();
 
   void start(const FileDescriptor& fd);
