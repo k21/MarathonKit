@@ -19,6 +19,7 @@ public:
   ~AsyncReader();
 
   void start(const FileDescriptor& fd);
+  void stop();
   bool isRunning() const;
 
   size_t charsReady();
@@ -35,7 +36,7 @@ private:
   void backgroundThread();
 
   FileDescriptor mFd;
-  const Pipe mExitPipe;
+  Pipe mExitPipe;
 
   size_t mLinesReady;
 

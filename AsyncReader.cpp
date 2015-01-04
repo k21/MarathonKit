@@ -20,8 +20,7 @@ AsyncReader::AsyncReader():
 
 AsyncReader::~AsyncReader() {
   if (isRunning()) {
-    mExitPipe.getWriteFd().write("X");
-    mThread.join();
+    stop();
   }
 }
 
@@ -32,6 +31,23 @@ void AsyncReader::start(const FileDescriptor& fd) {
 
   mFd = fd;
   mThread = std::thread(std::bind(&AsyncReader::backgroundThread, this));
+}
+
+void AsyncReader::stop() {
+  if (!isRunning()) {
+    throw std::runtime_error("stop called but AsyncReader is not running");
+  }
+
+  mExitPipe.getWriteFd().write("X");
+  mThread.join();
+
+  mFd = FileDescriptor();
+  mExitPipe = Pipe();
+  mLinesReady = 0;
+  mBuffer = std::deque<char>();
+  mException = false;
+  mExceptionMessage = "";
+  mThread = std::thread();
 }
 
 bool AsyncReader::isRunning() const {
