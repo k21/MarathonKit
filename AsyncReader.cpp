@@ -13,6 +13,10 @@ AsyncReader::AsyncReader():
   mBuffer(),
   mBufferMutex(),
   mDataReadyCondition(),
+  mFreeCapacityCondition(),
+  mStopRequested(false),
+  mCharCapacity(4096),
+  mLineCapacity(8),
   mException(false),
   mExceptionMessage(),
   mThread() {}
@@ -37,12 +41,18 @@ void AsyncReader::stop() {
     throw std::runtime_error("stop called but AsyncReader is not running");
   }
 
+  {
+    std::lock_guard<std::mutex> lock(mBufferMutex);
+    mStopRequested = true;
+  }
   mExitPipe.getWriteFd().write("X");
+  mFreeCapacityCondition.notify_all();
   mThread.join();
 
   mFd = FileDescriptor();
   mExitPipe = Pipe();
   mBuffer.clear();
+  mStopRequested = false;
   mException = false;
   mExceptionMessage = "";
   mThread = std::thread();
@@ -70,7 +80,9 @@ char AsyncReader::getChar() {
   if (mBuffer.charsReady() == 0) {
     throw std::runtime_error(mExceptionMessage);
   }
-  return mBuffer.getChar();
+  char ch = mBuffer.getChar();
+  mFreeCapacityCondition.notify_all();
+  return ch;
 }
 
 string AsyncReader::getLine() {
@@ -81,7 +93,9 @@ string AsyncReader::getLine() {
   if (mBuffer.linesReady() == 0) {
     throw std::runtime_error(mExceptionMessage);
   }
-  return mBuffer.getLine();
+  string line = mBuffer.getLine();
+  mFreeCapacityCondition.notify_all();
+  return line;
 }
 
 void AsyncReader::backgroundThread() {
@@ -95,7 +109,7 @@ void AsyncReader::backgroundThread() {
       fdSet.selectReadable();
 
       if (fdSet.contains(exitFd)) {
-        break;
+        return;
       }
       if (!fdSet.contains(mFd)) {
         continue;
@@ -106,8 +120,14 @@ void AsyncReader::backgroundThread() {
         throw std::runtime_error("There is no more data to read");
       }
 
-      std::lock_guard<std::mutex> lock(mBufferMutex);
+      std::unique_lock<std::mutex> lock(mBufferMutex);
       for (char ch : buff) {
+        while (!hasFreeCapacity() && !mStopRequested) {
+          mFreeCapacityCondition.wait(lock);
+        }
+        if (!hasFreeCapacity()) {
+          return;
+        }
         mBuffer.putChar(ch);
       }
       mDataReadyCondition.notify_all();
@@ -118,6 +138,12 @@ void AsyncReader::backgroundThread() {
     mExceptionMessage = e.what();
     mDataReadyCondition.notify_all();
   }
+}
+
+bool AsyncReader::hasFreeCapacity() const {
+  return
+    mBuffer.charsReady() < mCharCapacity ||
+    mBuffer.linesReady() < mLineCapacity;
 }
 
 }

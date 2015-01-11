@@ -35,12 +35,19 @@ private:
 
   void backgroundThread();
 
+  bool hasFreeCapacity() const;
+
   FileDescriptor mFd;
   Pipe mExitPipe;
 
   LineBuffer mBuffer;
   std::mutex mBufferMutex;
   std::condition_variable mDataReadyCondition;
+  std::condition_variable mFreeCapacityCondition;
+  bool mStopRequested;
+
+  size_t mCharCapacity;
+  size_t mLineCapacity;
 
   bool mException;
   std::string mExceptionMessage;
