@@ -10,7 +10,6 @@ using std::string;
 AsyncReader::AsyncReader():
   mFd(),
   mExitPipe(),
-  mLinesReady(0),
   mBuffer(),
   mBufferMutex(),
   mDataReadyCondition(),
@@ -43,8 +42,7 @@ void AsyncReader::stop() {
 
   mFd = FileDescriptor();
   mExitPipe = Pipe();
-  mLinesReady = 0;
-  mBuffer = std::deque<char>();
+  mBuffer.clear();
   mException = false;
   mExceptionMessage = "";
   mThread = std::thread();
@@ -56,46 +54,34 @@ bool AsyncReader::isRunning() const {
 
 size_t AsyncReader::charsReady() {
   std::lock_guard<std::mutex> lock(mBufferMutex);
-  return mBuffer.size();
+  return mBuffer.charsReady();
 }
 
 size_t AsyncReader::linesReady() {
   std::lock_guard<std::mutex> lock(mBufferMutex);
-  return mLinesReady;
+  return mBuffer.linesReady();
 }
 
 char AsyncReader::getChar() {
   std::unique_lock<std::mutex> lock(mBufferMutex);
-  while (!mException && mBuffer.size() < 1) {
+  while (!mException && mBuffer.charsReady() == 0) {
     mDataReadyCondition.wait(lock);
   }
-  if (mBuffer.size() < 1) {
+  if (mBuffer.charsReady() == 0) {
     throw std::runtime_error(mExceptionMessage);
   }
-  char ch = mBuffer.front();
-  mBuffer.pop_front();
-  if (ch == '\n') {
-    --mLinesReady;
-  }
-  return ch;
+  return mBuffer.getChar();
 }
 
 string AsyncReader::getLine() {
   std::unique_lock<std::mutex> lock(mBufferMutex);
-  while (!mException && mLinesReady < 1) {
+  while (!mException && mBuffer.linesReady() == 0) {
     mDataReadyCondition.wait(lock);
   }
-  if (mLinesReady < 1) {
+  if (mBuffer.linesReady() == 0) {
     throw std::runtime_error(mExceptionMessage);
   }
-  string line;
-  while (mBuffer.front() != '\n') {
-    line += mBuffer.front();
-    mBuffer.pop_front();
-  }
-  mBuffer.pop_front();
-  --mLinesReady;
-  return line;
+  return mBuffer.getLine();
 }
 
 void AsyncReader::backgroundThread() {
@@ -122,10 +108,7 @@ void AsyncReader::backgroundThread() {
 
       std::lock_guard<std::mutex> lock(mBufferMutex);
       for (char ch : buff) {
-        mBuffer.push_back(ch);
-        if (ch == '\n') {
-          ++mLinesReady;
-        }
+        mBuffer.putChar(ch);
       }
       mDataReadyCondition.notify_all();
     }

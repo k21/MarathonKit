@@ -2,13 +2,13 @@
 #define MARATHON_KIT_ASYNC_READER_H_
 
 #include <condition_variable>
-#include <deque>
 #include <mutex>
 #include <string>
 #include <thread>
 
 #include "FileDescriptor.h"
 #include "Pipe.h"
+#include "LineBuffer.h"
 
 namespace MarathonKit {
 
@@ -38,9 +38,7 @@ private:
   FileDescriptor mFd;
   Pipe mExitPipe;
 
-  size_t mLinesReady;
-
-  std::deque<char> mBuffer;
+  LineBuffer mBuffer;
   std::mutex mBufferMutex;
   std::condition_variable mDataReadyCondition;
 
