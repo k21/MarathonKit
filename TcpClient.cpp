@@ -2,6 +2,8 @@
 #include <sys/types.h>
 #include <netdb.h>
 
+#include <cstring>
+
 #include "TcpClient.h"
 
 namespace MarathonKit {
