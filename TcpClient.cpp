@@ -102,8 +102,4 @@ string TcpClient::getLine() {
   return mAsyncReader.getLine();
 }
 
-istringstream TcpClient::getLineStream() {
-  return istringstream(mAsyncReader.getLine());
-}
-
 }

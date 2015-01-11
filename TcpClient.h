@@ -26,7 +26,6 @@ public:
 
   char getChar();
   std::string getLine();
-  std::istringstream getLineStream();
 
 private:
 
