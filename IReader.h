@@ -21,62 +21,20 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_ASYNC_READER_H_
-#define MARATHON_KIT_ASYNC_READER_H_
+#ifndef MARATHON_KIT_I_READER_H_
+#define MARATHON_KIT_I_READER_H_
 
-#include <condition_variable>
-#include <mutex>
-#include <string>
-#include <thread>
-
-#include "FileDescriptor.h"
-#include "IReader.h"
-#include "Pipe.h"
-#include "LineBuffer.h"
+#include <cstddef>
 
 namespace MarathonKit {
 
-class AsyncReader : public IReader {
+class IReader {
 public:
 
-  AsyncReader();
-  virtual ~AsyncReader();
+  virtual ~IReader() {}
 
-  void start(const FileDescriptor& fd);
-  void stop();
-  bool isRunning() const;
-
-  virtual size_t charsReady();
-  size_t linesReady();
-
-  virtual char getChar();
-  std::string getLine();
-
-private:
-
-  AsyncReader(const AsyncReader&) = delete;
-  AsyncReader& operator = (const AsyncReader&) = delete;
-
-  void backgroundThread();
-
-  bool hasFreeCapacity() const;
-
-  FileDescriptor mFd;
-  Pipe mExitPipe;
-
-  LineBuffer mBuffer;
-  std::mutex mBufferMutex;
-  std::condition_variable mDataReadyCondition;
-  std::condition_variable mFreeCapacityCondition;
-  bool mStopRequested;
-
-  size_t mCharCapacity;
-  size_t mLineCapacity;
-
-  bool mException;
-  std::string mExceptionMessage;
-
-  std::thread mThread;
+  virtual size_t charsReady() = 0;
+  virtual char getChar() = 0;
 
 };
 
