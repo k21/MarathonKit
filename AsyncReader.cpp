@@ -87,38 +87,21 @@ bool AsyncReader::isRunning() const {
 
 size_t AsyncReader::charsReady() {
   std::lock_guard<std::mutex> lock(mBufferMutex);
-  return mBuffer.charsReady();
-}
-
-size_t AsyncReader::linesReady() {
-  std::lock_guard<std::mutex> lock(mBufferMutex);
-  return mBuffer.linesReady();
+  return mBuffer.size();
 }
 
 char AsyncReader::getChar() {
   std::unique_lock<std::mutex> lock(mBufferMutex);
-  while (!mException && mBuffer.charsReady() == 0) {
+  while (!mException && mBuffer.empty()) {
     mDataReadyCondition.wait(lock);
   }
-  if (mBuffer.charsReady() == 0) {
+  if (mBuffer.empty()) {
     throw std::runtime_error(mExceptionMessage);
   }
-  char ch = mBuffer.getChar();
+  char ch = mBuffer.front();
+  mBuffer.pop_front();
   mFreeCapacityCondition.notify_all();
   return ch;
-}
-
-string AsyncReader::getLine() {
-  std::unique_lock<std::mutex> lock(mBufferMutex);
-  while (!mException && mBuffer.linesReady() == 0) {
-    mDataReadyCondition.wait(lock);
-  }
-  if (mBuffer.linesReady() == 0) {
-    throw std::runtime_error(mExceptionMessage);
-  }
-  string line = mBuffer.getLine();
-  mFreeCapacityCondition.notify_all();
-  return line;
 }
 
 void AsyncReader::backgroundThread() {
@@ -151,7 +134,7 @@ void AsyncReader::backgroundThread() {
         if (!hasFreeCapacity()) {
           return;
         }
-        mBuffer.putChar(ch);
+        mBuffer.push_back(ch);
       }
       mDataReadyCondition.notify_all();
     }
@@ -164,9 +147,7 @@ void AsyncReader::backgroundThread() {
 }
 
 bool AsyncReader::hasFreeCapacity() const {
-  return
-    mBuffer.charsReady() < mCharCapacity ||
-    mBuffer.linesReady() < mLineCapacity;
+  return mBuffer.size() < mCharCapacity;
 }
 
 }

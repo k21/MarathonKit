@@ -24,10 +24,10 @@
 #ifndef MARATHON_KIT_TCP_CLIENT_H_
 #define MARATHON_KIT_TCP_CLIENT_H_
 
-#include <sstream>
 #include <string>
 
-#include "AsyncReader.h"
+#include "FileDescriptor.h"
+#include "LineBuffer.h"
 
 namespace MarathonKit {
 
@@ -56,7 +56,7 @@ private:
   TcpClient& operator = (const TcpClient&) = delete;
 
   FileDescriptor mFd;
-  AsyncReader mAsyncReader;
+  LineBuffer mLineBuffer;
 
 };
 

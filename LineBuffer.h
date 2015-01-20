@@ -25,7 +25,10 @@
 #define MARATHON_KIT_LINE_BUFFER_H_
 
 #include <deque>
+#include <memory>
 #include <string>
+
+#include "IReader.h"
 
 namespace MarathonKit {
 
@@ -33,10 +36,9 @@ class LineBuffer {
 public:
 
   LineBuffer();
+  LineBuffer(std::unique_ptr<IReader>&& reader);
 
-  void clear();
-
-  void putChar(char ch);
+  bool isInitialized() const;
 
   size_t charsReady() const;
   char getChar();
@@ -46,6 +48,9 @@ public:
 
 private:
 
+  void loadChar();
+
+  std::unique_ptr<IReader> mReader;
   std::deque<char> mBuffer;
   std::size_t mLinesReady;
 

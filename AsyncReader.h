@@ -25,6 +25,7 @@
 #define MARATHON_KIT_ASYNC_READER_H_
 
 #include <condition_variable>
+#include <deque>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -32,7 +33,6 @@
 #include "FileDescriptor.h"
 #include "IReader.h"
 #include "Pipe.h"
-#include "LineBuffer.h"
 
 namespace MarathonKit {
 
@@ -47,10 +47,8 @@ public:
   bool isRunning() const;
 
   virtual size_t charsReady();
-  size_t linesReady();
 
   virtual char getChar();
-  std::string getLine();
 
 private:
 
@@ -64,7 +62,7 @@ private:
   FileDescriptor mFd;
   Pipe mExitPipe;
 
-  LineBuffer mBuffer;
+  std::deque<char> mBuffer;
   std::mutex mBufferMutex;
   std::condition_variable mDataReadyCondition;
   std::condition_variable mFreeCapacityCondition;

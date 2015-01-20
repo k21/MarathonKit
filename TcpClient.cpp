@@ -27,16 +27,19 @@
 
 #include <cstring>
 
+#include "AsyncReader.h"
+
 #include "TcpClient.h"
 
 namespace MarathonKit {
 
 using std::istringstream;
 using std::string;
+using std::swap;
 
 TcpClient::TcpClient():
   mFd(),
-  mAsyncReader() {}
+  mLineBuffer() {}
 
 TcpClient::~TcpClient() {
   if (isConnected()) {
@@ -84,7 +87,9 @@ void TcpClient::connect(const string& host, const string& service) {
   if (!mFd.isValid()) {
     throw std::runtime_error("Could not connect to " + host + ":" + service);
   }
-  mAsyncReader.start(mFd);
+  std::unique_ptr<AsyncReader> asyncReader(new AsyncReader());
+  asyncReader->start(mFd);
+  mLineBuffer = LineBuffer(std::move(asyncReader));
 }
 
 void TcpClient::disconnect() {
@@ -93,12 +98,12 @@ void TcpClient::disconnect() {
         "disconnect called but TcpClient is not connected");
   }
 
-  mAsyncReader.stop();
+  mLineBuffer = LineBuffer();
   mFd = FileDescriptor();
 }
 
 bool TcpClient::isConnected() const {
-  return mAsyncReader.isRunning();
+  return mLineBuffer.isInitialized();
 }
 
 void TcpClient::sendLine(const string& line) {
@@ -110,19 +115,19 @@ void TcpClient::sendRaw(const string& data) {
 }
 
 size_t TcpClient::charsReady() {
-  return mAsyncReader.charsReady();
+  return mLineBuffer.charsReady();
 }
 
 size_t TcpClient::linesReady() {
-  return mAsyncReader.linesReady();
+  return mLineBuffer.linesReady();
 }
 
 char TcpClient::getChar() {
-  return mAsyncReader.getChar();
+  return mLineBuffer.getChar();
 }
 
 string TcpClient::getLine() {
-  return mAsyncReader.getLine();
+  return mLineBuffer.getLine();
 }
 
 }

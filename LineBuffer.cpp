@@ -27,20 +27,20 @@
 
 namespace MarathonKit {
 
+using std::unique_ptr;
+
 LineBuffer::LineBuffer():
+  mReader(),
   mBuffer(),
   mLinesReady(0) {}
 
-void LineBuffer::clear() {
-  mBuffer.clear();
-  mLinesReady = 0;
-}
+LineBuffer::LineBuffer(unique_ptr<IReader>&& reader):
+  mReader(std::move(reader)),
+  mBuffer(),
+  mLinesReady(0) {}
 
-void LineBuffer::putChar(char ch) {
-  mBuffer.push_back(ch);
-  if (ch == '\n') {
-    ++mLinesReady;
-  }
+bool LineBuffer::isInitialized() const {
+  return mReader != nullptr;
 }
 
 size_t LineBuffer::charsReady() const {
@@ -49,7 +49,7 @@ size_t LineBuffer::charsReady() const {
 
 char LineBuffer::getChar() {
   if (mBuffer.empty()) {
-    throw std::runtime_error("getChar called on an empty buffer");
+    loadChar();
   }
   char ch = mBuffer.front();
   mBuffer.pop_front();
@@ -64,8 +64,8 @@ size_t LineBuffer::linesReady() const {
 }
 
 std::string LineBuffer::getLine() {
-  if (mLinesReady == 0) {
-    throw std::runtime_error("getLine callen on a buffer with no lines");
+  while (mLinesReady == 0) {
+    loadChar();
   }
   auto it = mBuffer.begin();
   while (*it != '\n') {
@@ -76,6 +76,17 @@ std::string LineBuffer::getLine() {
   mBuffer.erase(mBuffer.begin(), it);
   --mLinesReady;
   return line;
+}
+
+void LineBuffer::loadChar() {
+  if (mReader == nullptr) {
+    throw std::runtime_error("Cannot read from an unitialized LineBuffer");
+  }
+  char ch = mReader->getChar();
+  mBuffer.push_back(ch);
+  if (ch == '\n') {
+    ++mLinesReady;
+  }
 }
 
 }
