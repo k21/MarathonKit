@@ -39,7 +39,6 @@ AsyncReader::AsyncReader():
   mFreeCapacityCondition(),
   mStopRequested(false),
   mCharCapacity(4096),
-  mLineCapacity(8),
   mException(false),
   mExceptionMessage(),
   mThread() {}
