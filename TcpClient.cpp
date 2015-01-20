@@ -41,18 +41,9 @@ TcpClient::TcpClient():
   mFd(),
   mLineBuffer() {}
 
-TcpClient::~TcpClient() {
-  if (isConnected()) {
-    disconnect();
-  }
-}
-
-void TcpClient::connect(const string& host, const string& service) {
-  if (isConnected()) {
-    throw std::runtime_error(
-        "connect called but TcpClient is already connected");
-  }
-
+TcpClient::TcpClient(const std::string& host, const std::string& service):
+  mFd(),
+  mLineBuffer() {
   addrinfo hints;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = PF_UNSPEC;
@@ -90,16 +81,6 @@ void TcpClient::connect(const string& host, const string& service) {
   std::unique_ptr<AsyncReader> asyncReader(new AsyncReader());
   asyncReader->start(mFd);
   mLineBuffer = LineBuffer(std::move(asyncReader));
-}
-
-void TcpClient::disconnect() {
-  if (!isConnected()) {
-    throw std::runtime_error(
-        "disconnect called but TcpClient is not connected");
-  }
-
-  mLineBuffer = LineBuffer();
-  mFd = FileDescriptor();
 }
 
 bool TcpClient::isConnected() const {

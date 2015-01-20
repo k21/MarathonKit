@@ -35,10 +35,8 @@ class TcpClient {
 public:
 
   TcpClient();
-  ~TcpClient();
+  TcpClient(const std::string& host, const std::string& service);
 
-  void connect(const std::string& host, const std::string& service);
-  void disconnect();
   bool isConnected() const;
 
   void sendLine(const std::string& line);
