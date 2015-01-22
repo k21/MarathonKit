@@ -78,8 +78,7 @@ TcpClient::TcpClient(const std::string& host, const std::string& service):
   if (!mFd.isValid()) {
     throw std::runtime_error("Could not connect to " + host + ":" + service);
   }
-  std::unique_ptr<AsyncReader> asyncReader(new AsyncReader());
-  asyncReader->start(mFd);
+  std::unique_ptr<AsyncReader> asyncReader(new AsyncReader(mFd));
   mLineBuffer = LineBuffer(std::move(asyncReader));
 }
 

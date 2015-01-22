@@ -40,10 +40,9 @@ class AsyncReader : public IReader {
 public:
 
   AsyncReader();
+  explicit AsyncReader(const FileDescriptor& fd);
   virtual ~AsyncReader();
 
-  void start(const FileDescriptor& fd);
-  void stop();
   bool isRunning() const;
 
   virtual size_t charsReady();

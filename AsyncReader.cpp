@@ -43,24 +43,22 @@ AsyncReader::AsyncReader():
   mExceptionMessage(),
   mThread() {}
 
+AsyncReader::AsyncReader(const FileDescriptor& fd):
+  mFd(fd),
+  mExitPipe(),
+  mBuffer(),
+  mBufferMutex(),
+  mDataReadyCondition(),
+  mFreeCapacityCondition(),
+  mStopRequested(false),
+  mCharCapacity(4096),
+  mException(false),
+  mExceptionMessage(),
+  mThread(std::bind(&AsyncReader::backgroundThread, this)) {}
+
 AsyncReader::~AsyncReader() {
-  if (isRunning()) {
-    stop();
-  }
-}
-
-void AsyncReader::start(const FileDescriptor& fd) {
-  if (isRunning()) {
-    throw std::runtime_error("start called but AsyncReader is already running");
-  }
-
-  mFd = fd;
-  mThread = std::thread(std::bind(&AsyncReader::backgroundThread, this));
-}
-
-void AsyncReader::stop() {
   if (!isRunning()) {
-    throw std::runtime_error("stop called but AsyncReader is not running");
+    return;
   }
 
   {
@@ -70,14 +68,6 @@ void AsyncReader::stop() {
   mExitPipe.getWriteFd().write("X");
   mFreeCapacityCondition.notify_all();
   mThread.join();
-
-  mFd = FileDescriptor();
-  mExitPipe = Pipe();
-  mBuffer.clear();
-  mStopRequested = false;
-  mException = false;
-  mExceptionMessage = "";
-  mThread = std::thread();
 }
 
 bool AsyncReader::isRunning() const {
