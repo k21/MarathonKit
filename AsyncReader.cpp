@@ -22,6 +22,7 @@
  */
 
 #include "AsyncReader.h"
+#include "FileDescriptorSet.h"
 
 #include <set>
 
@@ -97,7 +98,7 @@ void AsyncReader::backgroundThread() {
   try {
     const FileDescriptor& exitFd = mExitPipe.getReadFd();
     while (true) {
-      FileDescriptor::Set fdSet;
+      FileDescriptorSet fdSet;
       fdSet.add(exitFd);
       fdSet.add(mFd);
 

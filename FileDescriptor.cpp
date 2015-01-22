@@ -29,6 +29,7 @@
 #include <utility>
 
 #include "FileDescriptor.h"
+#include "FileDescriptorSet.h"
 
 namespace MarathonKit {
 
@@ -109,6 +110,18 @@ void FileDescriptor::write(const string& data) const {
   }
 }
 
+void FileDescriptor::addToSet(FileDescriptorSet& set) const {
+  set.add(mFd);
+}
+
+void FileDescriptor::removeFromSet(FileDescriptorSet& set) const {
+  set.remove(mFd);
+}
+
+bool FileDescriptor::isInSet(const FileDescriptorSet& set) const {
+  return set.contains(mFd);
+}
+
 FileDescriptor FileDescriptor::createOwnerOf(int fd) {
   return FileDescriptor(fd);
 }
@@ -119,42 +132,6 @@ FileDescriptor FileDescriptor::createCopyOf(int fd) {
     throw std::runtime_error(std::strerror(errno));
   }
   return FileDescriptor(fdCopy);
-}
-
-void FileDescriptor::Set::add(const FileDescriptor& fd) {
-  if (fd.mFd < 0) {
-    throw std::runtime_error(
-        "Invalid file descriptor cannot be added to a set");
-  }
-  fds.insert(fd.mFd);
-}
-
-bool FileDescriptor::Set::contains(const FileDescriptor& fd) const {
-  return fds.count(fd.mFd) > 0;
-}
-
-void FileDescriptor::Set::selectReadable() {
-  int nfds = 0;
-  fd_set readFds;
-  FD_ZERO(&readFds);
-
-  for (int fd : fds) {
-    nfds = std::max(nfds, fd + 1);
-    FD_SET(fd, &readFds);
-  }
-
-  int rc = select(nfds, &readFds, nullptr, nullptr, nullptr);
-  if (rc < 0) {
-    throw std::runtime_error(std::strerror(errno));
-  }
-
-  std::set<int> newFds;
-  for (int fd : fds) {
-    if (FD_ISSET(fd, &readFds)) {
-      newFds.insert(fd);
-    }
-  }
-  swap(fds, newFds);
 }
 
 void swap(FileDescriptor& fd1, FileDescriptor& fd2) {

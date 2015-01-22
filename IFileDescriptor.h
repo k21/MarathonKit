@@ -21,48 +21,28 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_FILE_DESCRIPTOR_H_
-#define MARATHON_KIT_FILE_DESCRIPTOR_H_
+#ifndef MARATHON_KIT_I_FILE_DESCRIPTOR_H_
+#define MARATHON_KIT_I_FILE_DESCRIPTOR_H_
 
 #include <string>
 
-#include "IFileDescriptor.h"
-
 namespace MarathonKit {
 
-class FileDescriptor : public IFileDescriptor {
+class FileDescriptorSet;
+
+class IFileDescriptor {
 public:
 
-  FileDescriptor();
-  FileDescriptor(const FileDescriptor& other);
-  FileDescriptor& operator = (const FileDescriptor& other);
-  FileDescriptor(FileDescriptor&& other);
-  FileDescriptor& operator = (FileDescriptor&& other);
-  virtual ~FileDescriptor();
+  virtual ~IFileDescriptor() {}
 
-  void swapWith(FileDescriptor& other);
+  virtual std::string read() const = 0;
+  virtual void write(const std::string& data) const = 0;
 
-  bool isValid() const;
-
-  virtual std::string read() const;
-  virtual void write(const std::string& data) const;
-
-  virtual void addToSet(FileDescriptorSet& set) const;
-  virtual void removeFromSet(FileDescriptorSet& set) const;
-  virtual bool isInSet(const FileDescriptorSet& set) const;
-
-  static FileDescriptor createOwnerOf(int fd);
-  static FileDescriptor createCopyOf(int fd);
-
-private:
-
-  explicit FileDescriptor(int fd);
-
-  int mFd;
+  virtual void addToSet(FileDescriptorSet& set) const = 0;
+  virtual void removeFromSet(FileDescriptorSet& set) const = 0;
+  virtual bool isInSet(const FileDescriptorSet& set) const = 0;
 
 };
-
-void swap(FileDescriptor& fd1, FileDescriptor& fd2);
 
 }
 
