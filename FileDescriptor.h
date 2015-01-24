@@ -49,6 +49,10 @@ public:
   virtual std::string read() const;
   virtual void write(const std::string& data) const;
 
+  static FileDescriptor createTcpConnection(
+      const std::string& host,
+      const std::string& service);
+
   static FileDescriptor createOwnerOf(int fd);
   static FileDescriptor createCopyOf(int fd);
 
