@@ -45,7 +45,15 @@ bool LineBuffer::isInitialized() const {
   return mFd != nullptr;
 }
 
-size_t LineBuffer::charsReady() const {
+size_t LineBuffer::charsReady() {
+  if (!isInitialized()) {
+    return 0;
+  }
+
+  if (mBuffer.empty() && mFd->isReadyForReading()) {
+    loadChars();
+  }
+
   return mBuffer.size();
 }
 
@@ -61,7 +69,15 @@ char LineBuffer::getChar() {
   return ch;
 }
 
-size_t LineBuffer::linesReady() const {
+size_t LineBuffer::linesReady() {
+  if (!isInitialized()) {
+    return 0;
+  }
+
+  while (mLinesReady == 0 && mFd->isReadyForReading()) {
+    loadChars();
+  }
+
   return mLinesReady;
 }
 

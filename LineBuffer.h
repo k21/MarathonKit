@@ -40,10 +40,10 @@ public:
 
   bool isInitialized() const;
 
-  size_t charsReady() const;
+  size_t charsReady();
   char getChar();
 
-  size_t linesReady() const;
+  size_t linesReady();
   std::string getLine();
 
 private:
