@@ -35,6 +35,8 @@ public:
 
   virtual ~IFileDescriptor() {}
 
+  virtual bool isReadyForReading() const = 0;
+
   virtual std::string read() const = 0;
   virtual void write(const std::string& data) const = 0;
 

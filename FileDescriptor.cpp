@@ -21,6 +21,7 @@
  * from me and not from my employer (Facebook).
  */
 
+#include <sys/select.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -80,6 +81,25 @@ void FileDescriptor::swapWith(FileDescriptor& other) {
 
 bool FileDescriptor::isValid() const {
   return mFd >= 0;
+}
+
+bool FileDescriptor::isReadyForReading() const {
+  struct timeval timeout;
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 0;
+
+  fd_set readFds;
+  FD_ZERO(&readFds);
+  FD_SET(mFd, &readFds);
+
+  int nfds = mFd + 1;
+
+  int rc = select(nfds, &readFds, nullptr, nullptr, &timeout);
+  if (rc < 0) {
+    throw std::runtime_error(std::strerror(errno));
+  }
+
+  return FD_ISSET(mFd, &readFds);
 }
 
 string FileDescriptor::read() const {

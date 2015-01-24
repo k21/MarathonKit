@@ -44,6 +44,8 @@ public:
 
   bool isValid() const;
 
+  virtual bool isReadyForReading() const;
+
   virtual std::string read() const;
   virtual void write(const std::string& data) const;
 
