@@ -28,8 +28,6 @@
 
 namespace MarathonKit {
 
-class FileDescriptorSet;
-
 class IFileDescriptor {
 public:
 
@@ -39,10 +37,6 @@ public:
 
   virtual std::string read() const = 0;
   virtual void write(const std::string& data) const = 0;
-
-  virtual void addToSet(FileDescriptorSet& set) const = 0;
-  virtual void removeFromSet(FileDescriptorSet& set) const = 0;
-  virtual bool isInSet(const FileDescriptorSet& set) const = 0;
 
 };
 

@@ -49,10 +49,6 @@ public:
   virtual std::string read() const;
   virtual void write(const std::string& data) const;
 
-  virtual void addToSet(FileDescriptorSet& set) const;
-  virtual void removeFromSet(FileDescriptorSet& set) const;
-  virtual bool isInSet(const FileDescriptorSet& set) const;
-
   static FileDescriptor createOwnerOf(int fd);
   static FileDescriptor createCopyOf(int fd);
 

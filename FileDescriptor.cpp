@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "FileDescriptor.h"
-#include "FileDescriptorSet.h"
 
 namespace MarathonKit {
 
@@ -128,18 +127,6 @@ void FileDescriptor::write(const string& data) const {
     }
     offset += static_cast<size_t>(rc);
   }
-}
-
-void FileDescriptor::addToSet(FileDescriptorSet& set) const {
-  set.add(mFd);
-}
-
-void FileDescriptor::removeFromSet(FileDescriptorSet& set) const {
-  set.remove(mFd);
-}
-
-bool FileDescriptor::isInSet(const FileDescriptorSet& set) const {
-  return set.contains(mFd);
 }
 
 FileDescriptor FileDescriptor::createOwnerOf(int fd) {
