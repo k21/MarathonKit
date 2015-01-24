@@ -27,8 +27,6 @@
 
 #include <cstring>
 
-#include "AsyncReader.h"
-
 #include "TcpClient.h"
 
 namespace MarathonKit {
@@ -71,15 +69,15 @@ TcpClient::TcpClient(const std::string& host, const std::string& service):
       info = info->ai_next;
       continue;
     }
-    mFd = FileDescriptor::createOwnerOf(socketFd);
+    mFd = std::make_shared<FileDescriptor>(
+        FileDescriptor::createOwnerOf(socketFd));
     break;
   }
   freeaddrinfo(infos);
-  if (!mFd.isValid()) {
+  if (mFd == nullptr) {
     throw std::runtime_error("Could not connect to " + host + ":" + service);
   }
-  std::unique_ptr<AsyncReader> asyncReader(new AsyncReader(mFd));
-  mLineBuffer = LineBuffer(std::move(asyncReader));
+  mLineBuffer = LineBuffer(mFd);
 }
 
 bool TcpClient::isConnected() const {
@@ -87,11 +85,14 @@ bool TcpClient::isConnected() const {
 }
 
 void TcpClient::sendLine(const string& line) {
-  mFd.write(line + '\n');
+  sendRaw(line + "\n");
 }
 
 void TcpClient::sendRaw(const string& data) {
-  mFd.write(data);
+  if (!isConnected()) {
+    throw std::runtime_error("send called on a disconnected TcpSocket");
+  }
+  mFd->write(data);
 }
 
 size_t TcpClient::charsReady() {

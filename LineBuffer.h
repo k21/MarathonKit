@@ -28,15 +28,15 @@
 #include <memory>
 #include <string>
 
-#include "IReader.h"
-
 namespace MarathonKit {
+
+class IFileDescriptor;
 
 class LineBuffer {
 public:
 
   LineBuffer();
-  LineBuffer(std::unique_ptr<IReader>&& reader);
+  explicit LineBuffer(const std::shared_ptr<IFileDescriptor>& fd);
 
   bool isInitialized() const;
 
@@ -48,9 +48,9 @@ public:
 
 private:
 
-  void loadChar();
+  void loadChars();
 
-  std::unique_ptr<IReader> mReader;
+  std::shared_ptr<IFileDescriptor> mFd;
   std::deque<char> mBuffer;
   std::size_t mLinesReady;
 

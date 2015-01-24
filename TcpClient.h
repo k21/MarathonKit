@@ -25,6 +25,7 @@
 #define MARATHON_KIT_TCP_CLIENT_H_
 
 #include <string>
+#include <memory>
 
 #include "FileDescriptor.h"
 #include "LineBuffer.h"
@@ -53,7 +54,7 @@ private:
   TcpClient(const TcpClient&) = delete;
   TcpClient& operator = (const TcpClient&) = delete;
 
-  FileDescriptor mFd;
+  std::shared_ptr<FileDescriptor> mFd;
   LineBuffer mLineBuffer;
 
 };

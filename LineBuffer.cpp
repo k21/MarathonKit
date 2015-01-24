@@ -21,26 +21,28 @@
  * from me and not from my employer (Facebook).
  */
 
+#include "IFileDescriptor.h"
+
 #include "LineBuffer.h"
 
 #include <stdexcept>
 
 namespace MarathonKit {
 
-using std::unique_ptr;
+using std::shared_ptr;
 
 LineBuffer::LineBuffer():
-  mReader(),
+  mFd(),
   mBuffer(),
   mLinesReady(0) {}
 
-LineBuffer::LineBuffer(unique_ptr<IReader>&& reader):
-  mReader(std::move(reader)),
+LineBuffer::LineBuffer(const shared_ptr<IFileDescriptor>& fd):
+  mFd(fd),
   mBuffer(),
   mLinesReady(0) {}
 
 bool LineBuffer::isInitialized() const {
-  return mReader != nullptr;
+  return mFd != nullptr;
 }
 
 size_t LineBuffer::charsReady() const {
@@ -49,7 +51,7 @@ size_t LineBuffer::charsReady() const {
 
 char LineBuffer::getChar() {
   if (mBuffer.empty()) {
-    loadChar();
+    loadChars();
   }
   char ch = mBuffer.front();
   mBuffer.pop_front();
@@ -65,7 +67,7 @@ size_t LineBuffer::linesReady() const {
 
 std::string LineBuffer::getLine() {
   while (mLinesReady == 0) {
-    loadChar();
+    loadChars();
   }
   auto it = mBuffer.begin();
   while (*it != '\n') {
@@ -78,14 +80,15 @@ std::string LineBuffer::getLine() {
   return line;
 }
 
-void LineBuffer::loadChar() {
-  if (mReader == nullptr) {
+void LineBuffer::loadChars() {
+  if (mFd == nullptr) {
     throw std::runtime_error("Cannot read from an unitialized LineBuffer");
   }
-  char ch = mReader->getChar();
-  mBuffer.push_back(ch);
-  if (ch == '\n') {
-    ++mLinesReady;
+  for (char ch : mFd->read()) {
+    mBuffer.push_back(ch);
+    if (ch == '\n') {
+      ++mLinesReady;
+    }
   }
 }
 
