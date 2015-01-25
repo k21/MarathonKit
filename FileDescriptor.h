@@ -31,6 +31,11 @@ namespace MarathonKit {
 class FileDescriptor {
 public:
 
+  enum class Mode : char {
+    STREAM,
+    MESSAGE,
+  };
+
   FileDescriptor();
   FileDescriptor(const FileDescriptor& other);
   FileDescriptor& operator = (const FileDescriptor& other);
@@ -51,14 +56,15 @@ public:
       const std::string& host,
       const std::string& service);
 
-  static FileDescriptor createOwnerOf(int fd);
-  static FileDescriptor createCopyOf(int fd);
+  static FileDescriptor createOwnerOf(int fd, Mode mode = Mode::STREAM);
+  static FileDescriptor createCopyOf(int fd, Mode mode = Mode::STREAM);
 
 private:
 
-  explicit FileDescriptor(int fd);
+  FileDescriptor(int fd, Mode mode);
 
   int mFd;
+  Mode mMode;
 
 };
 

@@ -40,13 +40,16 @@ using std::string;
 using std::swap;
 
 FileDescriptor::FileDescriptor():
-  mFd(-1) {}
+  mFd(-1),
+  mMode(Mode::STREAM) {}
 
-FileDescriptor::FileDescriptor(int fd):
-  mFd(fd) {}
+FileDescriptor::FileDescriptor(int fd, Mode mode):
+  mFd(fd),
+  mMode(mode) {}
 
 FileDescriptor::FileDescriptor(const FileDescriptor& other):
-  mFd(-1) {
+  mFd(-1),
+  mMode(other.mMode) {
   if (other.mFd >= 0) {
     mFd = dup(other.mFd);
     if (mFd < 0) {
@@ -62,7 +65,8 @@ FileDescriptor& FileDescriptor::operator = (const FileDescriptor& other) {
 }
 
 FileDescriptor::FileDescriptor(FileDescriptor&& other):
-  mFd(-1) {
+  mFd(-1),
+  mMode(Mode::STREAM) {
   swap(*this, other);
 }
 
@@ -79,6 +83,7 @@ FileDescriptor::~FileDescriptor() {
 
 void FileDescriptor::swapWith(FileDescriptor& other) {
   swap(mFd, other.mFd);
+  swap(mMode, other.mMode);
 }
 
 bool FileDescriptor::isValid() const {
@@ -163,7 +168,7 @@ FileDescriptor FileDescriptor::createTcpConnection(
       info = info->ai_next;
       continue;
     }
-    fd = FileDescriptor::createOwnerOf(socketFd);
+    fd = FileDescriptor::createOwnerOf(socketFd, Mode::STREAM);
     break;
   }
   freeaddrinfo(infos);
@@ -173,16 +178,16 @@ FileDescriptor FileDescriptor::createTcpConnection(
   return std::move(fd);
 }
 
-FileDescriptor FileDescriptor::createOwnerOf(int fd) {
-  return FileDescriptor(fd);
+FileDescriptor FileDescriptor::createOwnerOf(int fd, Mode mode) {
+  return FileDescriptor(fd, mode);
 }
 
-FileDescriptor FileDescriptor::createCopyOf(int fd) {
+FileDescriptor FileDescriptor::createCopyOf(int fd, Mode mode) {
   int fdCopy = dup(fd);
   if (fdCopy < 0) {
     throw std::runtime_error(std::strerror(errno));
   }
-  return FileDescriptor(fdCopy);
+  return FileDescriptor(fdCopy, mode);
 }
 
 void swap(FileDescriptor& fd1, FileDescriptor& fd2) {
