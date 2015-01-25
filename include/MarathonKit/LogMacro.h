@@ -21,10 +21,14 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_CORE_H_
-#define MARATHON_KIT_CORE_H_
+#ifndef MARATHON_KIT_LOG_MACRO_H_
+#define MARATHON_KIT_LOG_MACRO_H_
 
 #include "Log.h"
-#include "TcpClient.h"
+
+#define LOGD ::MarathonKit::Log(__FILE__, __LINE__).d
+#define LOGI ::MarathonKit::Log(__FILE__, __LINE__).i
+#define LOGW ::MarathonKit::Log(__FILE__, __LINE__).w
+#define LOGE ::MarathonKit::Log(__FILE__, __LINE__).e
 
 #endif

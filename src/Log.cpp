@@ -21,10 +21,30 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_CORE_H_
-#define MARATHON_KIT_CORE_H_
+#include <stdexcept>
 
 #include "Log.h"
-#include "TcpClient.h"
 
-#endif
+namespace MarathonKit {
+
+Log::Level Log::mMinLogLevel = Log::Level::DEBUG;
+
+char Log::mLevelString[4][10] = {
+  "DEBUG",
+  "INFO",
+  "WARN",
+  "ERR",
+};
+
+std::ofstream Log::mLogFile;
+
+void Log::setLogFile(const std::string& fileName) {
+  mLogFile.clear();
+  mLogFile.open(fileName, std::fstream::app);
+
+  if (mLogFile.fail()) {
+    throw std::runtime_error("Could not open the log file");
+  }
+}
+
+}
