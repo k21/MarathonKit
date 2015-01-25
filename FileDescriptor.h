@@ -26,11 +26,9 @@
 
 #include <string>
 
-#include "IFileDescriptor.h"
-
 namespace MarathonKit {
 
-class FileDescriptor : public IFileDescriptor {
+class FileDescriptor {
 public:
 
   FileDescriptor();
@@ -38,16 +36,16 @@ public:
   FileDescriptor& operator = (const FileDescriptor& other);
   FileDescriptor(FileDescriptor&& other);
   FileDescriptor& operator = (FileDescriptor&& other);
-  virtual ~FileDescriptor();
+  ~FileDescriptor();
 
   void swapWith(FileDescriptor& other);
 
   bool isValid() const;
 
-  virtual bool isReadyForReading() const;
+  bool isReadyForReading() const;
 
-  virtual std::string read() const;
-  virtual void write(const std::string& data) const;
+  std::string read() const;
+  void write(const std::string& data) const;
 
   static FileDescriptor createTcpConnection(
       const std::string& host,

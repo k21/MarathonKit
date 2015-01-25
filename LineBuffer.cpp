@@ -21,7 +21,7 @@
  * from me and not from my employer (Facebook).
  */
 
-#include "IFileDescriptor.h"
+#include "FileDescriptor.h"
 
 #include "LineBuffer.h"
 
@@ -36,7 +36,7 @@ LineBuffer::LineBuffer():
   mBuffer(),
   mLinesReady(0) {}
 
-LineBuffer::LineBuffer(const shared_ptr<IFileDescriptor>& fd):
+LineBuffer::LineBuffer(const shared_ptr<FileDescriptor>& fd):
   mFd(fd),
   mBuffer(),
   mLinesReady(0) {}

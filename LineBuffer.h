@@ -30,13 +30,13 @@
 
 namespace MarathonKit {
 
-class IFileDescriptor;
+class FileDescriptor;
 
 class LineBuffer {
 public:
 
   LineBuffer();
-  explicit LineBuffer(const std::shared_ptr<IFileDescriptor>& fd);
+  explicit LineBuffer(const std::shared_ptr<FileDescriptor>& fd);
 
   bool isInitialized() const;
 
@@ -50,7 +50,7 @@ private:
 
   void loadChars();
 
-  std::shared_ptr<IFileDescriptor> mFd;
+  std::shared_ptr<FileDescriptor> mFd;
   std::deque<char> mBuffer;
   std::size_t mLinesReady;
 
