@@ -178,6 +178,46 @@ FileDescriptor FileDescriptor::createTcpConnection(
   return std::move(fd);
 }
 
+FileDescriptor FileDescriptor::createUdpListener(const std::string& service) {
+  addrinfo hints;
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family = PF_UNSPEC;
+  hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_protocol = IPPROTO_UDP;
+  hints.ai_flags = AI_PASSIVE;
+  addrinfo* infos;
+  int rc = getaddrinfo(nullptr, service.c_str(), &hints, &infos);
+  if (rc != 0) {
+    throw std::runtime_error(gai_strerror(rc));
+  }
+  addrinfo* info = infos;
+  FileDescriptor fd;
+  while (info != nullptr) {
+    int socketFd = socket(
+        info->ai_family,
+        info->ai_socktype,
+        info->ai_protocol);
+    if (socketFd < 0) {
+      // TODO: log error
+      info = info->ai_next;
+      continue;
+    }
+    rc = ::bind(socketFd, info->ai_addr, info->ai_addrlen);
+    if (rc != 0) {
+      // TODO: log error
+      info = info->ai_next;
+      continue;
+    }
+    fd = FileDescriptor::createOwnerOf(socketFd, Mode::MESSAGE);
+    break;
+  }
+  freeaddrinfo(infos);
+  if (!fd.isValid()) {
+    throw std::runtime_error("Could not listen on " + service);
+  }
+  return std::move(fd);
+}
+
 FileDescriptor FileDescriptor::createOwnerOf(int fd, Mode mode) {
   return FileDescriptor(fd, mode);
 }
