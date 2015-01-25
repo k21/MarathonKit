@@ -65,6 +65,12 @@ private:
 
   FileDescriptor(int fd, Mode mode);
 
+  std::string readStream() const;
+  std::string readMessage() const;
+
+  void writeStream(const std::string& data) const;
+  void writeMessage(const std::string& data) const;
+
   int mFd;
   Mode mMode;
 

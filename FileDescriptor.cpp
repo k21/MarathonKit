@@ -31,6 +31,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 #include "FileDescriptor.h"
 
@@ -113,6 +114,17 @@ string FileDescriptor::read() const {
   if (mFd < 0) {
     throw std::runtime_error("read called on an invalid file descriptor");
   }
+  switch (mMode) {
+    case Mode::STREAM:
+      return readStream();
+    case Mode::MESSAGE:
+      return readMessage();
+    default:
+      throw std::runtime_error("FileDescriptor has an invalid mode set");
+  }
+}
+
+string FileDescriptor::readStream() const {
   const int BUFF_SIZE = 4096;
   char buff[BUFF_SIZE];
   ssize_t rc = ::read(mFd, buff, BUFF_SIZE);
@@ -122,10 +134,42 @@ string FileDescriptor::read() const {
   return string(buff, static_cast<size_t>(rc));
 }
 
+string FileDescriptor::readMessage() const {
+  std::vector<char> buffer(32, '\0');
+  bool enoughSpace = false;
+  while (!enoughSpace) {
+    ssize_t rc = ::recv(mFd, buffer.data(), buffer.size(), MSG_PEEK);
+    if (rc < 0) {
+      throw std::runtime_error(std::strerror(errno));
+    }
+    if (static_cast<size_t>(rc) < buffer.size()) {
+      enoughSpace = true;
+    } else {
+      buffer = std::vector<char>(4 * buffer.size(), '\0');
+    }
+  }
+  ssize_t rc = ::recv(mFd, buffer.data(), buffer.size(), 0);
+  if (rc < 0) {
+    throw std::runtime_error(std::strerror(errno));
+  }
+  return string(buffer.data(), rc);
+}
+
 void FileDescriptor::write(const string& data) const {
   if (mFd < 0) {
     throw std::runtime_error("write called on an invalid file descriptor");
   }
+  switch (mMode) {
+    case Mode::STREAM:
+      writeStream(data);
+    case Mode::MESSAGE:
+      writeMessage(data);
+    default:
+      throw std::runtime_error("FileDescriptor has an invalid mode set");
+  }
+}
+
+void FileDescriptor::writeStream(const string& data) const {
   const char* buff = data.c_str();
   size_t offset = 0;
   while (offset < data.size()) {
@@ -134,6 +178,13 @@ void FileDescriptor::write(const string& data) const {
       throw std::runtime_error(std::strerror(errno));
     }
     offset += static_cast<size_t>(rc);
+  }
+}
+
+void FileDescriptor::writeMessage(const string& data) const {
+  ssize_t rc = ::send(mFd, data.c_str(), data.size(), 0);
+  if (rc < 0) {
+    throw std::runtime_error(std::strerror(errno));
   }
 }
 
