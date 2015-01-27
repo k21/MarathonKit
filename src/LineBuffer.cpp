@@ -22,6 +22,7 @@
  */
 
 #include "FileDescriptor.h"
+#include "LogMacro.h"
 
 #include "LineBuffer.h"
 
@@ -47,6 +48,7 @@ bool LineBuffer::isInitialized() const {
 
 size_t LineBuffer::charsReady() {
   if (!isInitialized()) {
+    LOGW("charsReady called on unitialized LineBuffer");
     return 0;
   }
 
@@ -71,6 +73,7 @@ char LineBuffer::getChar() {
 
 size_t LineBuffer::linesReady() {
   if (!isInitialized()) {
+    LOGW("linesReady called on unitialized LineBuffer");
     return 0;
   }
 

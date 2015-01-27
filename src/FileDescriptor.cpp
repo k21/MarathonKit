@@ -33,6 +33,8 @@
 #include <utility>
 #include <vector>
 
+#include "LogMacro.h"
+
 #include "FileDescriptor.h"
 
 namespace MarathonKit {
@@ -191,6 +193,7 @@ void FileDescriptor::writeMessage(const string& data) const {
 FileDescriptor FileDescriptor::createTcpConnection(
   const std::string& host,
   const std::string& service) {
+  LOGI("Trying to connect to ", host, ":", service, " using TCP...");
   addrinfo hints;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = PF_UNSPEC;
@@ -201,6 +204,9 @@ FileDescriptor FileDescriptor::createTcpConnection(
   if (rc != 0) {
     throw std::runtime_error(gai_strerror(rc));
   }
+  if (infos == nullptr) {
+    LOGE("Unknown host ", host, ":", service);
+  }
   addrinfo* info = infos;
   FileDescriptor fd;
   while (info != nullptr) {
@@ -209,13 +215,19 @@ FileDescriptor FileDescriptor::createTcpConnection(
         info->ai_socktype,
         info->ai_protocol);
     if (socketFd < 0) {
-      // TODO: log error
+      // TODO: use inet_ntop and print the actual address we tried to connect to
+      LOGW(
+          "Connection attempt to ", host, ":", service, " failed: ",
+          std::strerror(errno));
       info = info->ai_next;
       continue;
     }
     rc = ::connect(socketFd, info->ai_addr, info->ai_addrlen);
     if (rc != 0) {
-      // TODO: log error
+      // TODO: use inet_ntop and print the actual address we tried to connect to
+      LOGW(
+          "Connection attempt to ", host, ":", service, " failed: ",
+          std::strerror(errno));
       info = info->ai_next;
       continue;
     }
@@ -226,10 +238,12 @@ FileDescriptor FileDescriptor::createTcpConnection(
   if (!fd.isValid()) {
     throw std::runtime_error("Could not connect to " + host + ":" + service);
   }
+  LOGI("Connection attempt to ", host, ":", service, " was successful");
   return std::move(fd);
 }
 
 FileDescriptor FileDescriptor::createUdpListener(const std::string& service) {
+  LOGI("Trying to listen for UDP datagrams on service port ", service, "...");
   addrinfo hints;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = PF_UNSPEC;
@@ -241,6 +255,9 @@ FileDescriptor FileDescriptor::createUdpListener(const std::string& service) {
   if (rc != 0) {
     throw std::runtime_error(gai_strerror(rc));
   }
+  if (infos == nullptr) {
+    LOGE("Unknown service port ", service);
+  }
   addrinfo* info = infos;
   FileDescriptor fd;
   while (info != nullptr) {
@@ -249,13 +266,19 @@ FileDescriptor FileDescriptor::createUdpListener(const std::string& service) {
         info->ai_socktype,
         info->ai_protocol);
     if (socketFd < 0) {
-      // TODO: log error
+      // TODO: use inet_ntop and print the actual address we tried to connect to
+      LOGW(
+          "Listening on service port ", service, " failed: ",
+          std::strerror(errno));
       info = info->ai_next;
       continue;
     }
     rc = ::bind(socketFd, info->ai_addr, info->ai_addrlen);
     if (rc != 0) {
-      // TODO: log error
+      // TODO: use inet_ntop and print the actual address we tried to connect to
+      LOGW(
+          "Listening on service port ", service, " failed: ",
+          std::strerror(errno));
       info = info->ai_next;
       continue;
     }
@@ -264,8 +287,9 @@ FileDescriptor FileDescriptor::createUdpListener(const std::string& service) {
   }
   freeaddrinfo(infos);
   if (!fd.isValid()) {
-    throw std::runtime_error("Could not listen on " + service);
+    throw std::runtime_error("Could not listen on service port " + service);
   }
+  LOGI("Successfully listening on service port ", service);
   return std::move(fd);
 }
 
