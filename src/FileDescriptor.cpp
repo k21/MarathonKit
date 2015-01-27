@@ -164,8 +164,10 @@ void FileDescriptor::write(const string& data) const {
   switch (mMode) {
     case Mode::STREAM:
       writeStream(data);
+      break;
     case Mode::MESSAGE:
       writeMessage(data);
+      break;
     default:
       throw std::runtime_error("FileDescriptor has an invalid mode set");
   }
