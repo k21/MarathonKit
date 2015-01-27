@@ -154,7 +154,7 @@ string FileDescriptor::readMessage() const {
   if (rc < 0) {
     throw std::runtime_error(std::strerror(errno));
   }
-  return string(buffer.data(), rc);
+  return string(buffer.data(), static_cast<size_t>(rc));
 }
 
 void FileDescriptor::write(const string& data) const {
