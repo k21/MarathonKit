@@ -36,6 +36,22 @@ public:
   // Utitlity class, do not instantiate.
   Network() = delete;
 
+  enum class Family {
+    ANY,
+    IP_V4,
+    IP_V6,
+  };
+
+  enum class Protocol {
+    TCP,
+    UDP,
+  };
+
+  enum class Mode {
+    ACTIVE,
+    PASSIVE,
+  };
+
   static FileDescriptor createTcpConnection(
       const std::string& host,
       const std::string& service);
