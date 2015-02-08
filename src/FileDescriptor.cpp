@@ -21,10 +21,8 @@
  * from me and not from my employer (Facebook).
  */
 
-#include <netdb.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -190,109 +188,6 @@ void FileDescriptor::writeMessage(const string& data) const {
   if (rc < 0) {
     throw std::runtime_error(std::strerror(errno));
   }
-}
-
-FileDescriptor FileDescriptor::createTcpConnection(
-  const std::string& host,
-  const std::string& service) {
-  LOGI("Trying to connect to ", host, ":", service, " using TCP...");
-  addrinfo hints;
-  memset(&hints, 0, sizeof hints);
-  hints.ai_family = PF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_protocol = IPPROTO_TCP;
-  addrinfo* infos;
-  int rc = getaddrinfo(host.c_str(), service.c_str(), &hints, &infos);
-  if (rc != 0) {
-    throw std::runtime_error(gai_strerror(rc));
-  }
-  if (infos == nullptr) {
-    LOGE("Unknown host ", host, ":", service);
-  }
-  addrinfo* info = infos;
-  FileDescriptor fd;
-  while (info != nullptr) {
-    int socketFd = socket(
-        info->ai_family,
-        info->ai_socktype,
-        info->ai_protocol);
-    if (socketFd < 0) {
-      // TODO: use inet_ntop and print the actual address we tried to connect to
-      LOGW(
-          "Connection attempt to ", host, ":", service, " failed: ",
-          std::strerror(errno));
-      info = info->ai_next;
-      continue;
-    }
-    rc = ::connect(socketFd, info->ai_addr, info->ai_addrlen);
-    if (rc != 0) {
-      // TODO: use inet_ntop and print the actual address we tried to connect to
-      LOGW(
-          "Connection attempt to ", host, ":", service, " failed: ",
-          std::strerror(errno));
-      info = info->ai_next;
-      continue;
-    }
-    fd = FileDescriptor::createOwnerOf(socketFd, Mode::STREAM);
-    break;
-  }
-  freeaddrinfo(infos);
-  if (!fd.isValid()) {
-    throw std::runtime_error("Could not connect to " + host + ":" + service);
-  }
-  LOGI("Connection attempt to ", host, ":", service, " was successful");
-  return std::move(fd);
-}
-
-FileDescriptor FileDescriptor::createUdpListener(const std::string& service) {
-  LOGI("Trying to listen for UDP datagrams on service port ", service, "...");
-  addrinfo hints;
-  memset(&hints, 0, sizeof hints);
-  hints.ai_family = PF_UNSPEC;
-  hints.ai_socktype = SOCK_DGRAM;
-  hints.ai_protocol = IPPROTO_UDP;
-  hints.ai_flags = AI_PASSIVE;
-  addrinfo* infos;
-  int rc = getaddrinfo(nullptr, service.c_str(), &hints, &infos);
-  if (rc != 0) {
-    throw std::runtime_error(gai_strerror(rc));
-  }
-  if (infos == nullptr) {
-    LOGE("Unknown service port ", service);
-  }
-  addrinfo* info = infos;
-  FileDescriptor fd;
-  while (info != nullptr) {
-    int socketFd = socket(
-        info->ai_family,
-        info->ai_socktype,
-        info->ai_protocol);
-    if (socketFd < 0) {
-      // TODO: use inet_ntop and print the actual address we tried to connect to
-      LOGW(
-          "Listening on service port ", service, " failed: ",
-          std::strerror(errno));
-      info = info->ai_next;
-      continue;
-    }
-    rc = ::bind(socketFd, info->ai_addr, info->ai_addrlen);
-    if (rc != 0) {
-      // TODO: use inet_ntop and print the actual address we tried to connect to
-      LOGW(
-          "Listening on service port ", service, " failed: ",
-          std::strerror(errno));
-      info = info->ai_next;
-      continue;
-    }
-    fd = FileDescriptor::createOwnerOf(socketFd, Mode::MESSAGE);
-    break;
-  }
-  freeaddrinfo(infos);
-  if (!fd.isValid()) {
-    throw std::runtime_error("Could not listen on service port " + service);
-  }
-  LOGI("Successfully listening on service port ", service);
-  return std::move(fd);
 }
 
 FileDescriptor FileDescriptor::createOwnerOf(int fd, Mode mode) {
