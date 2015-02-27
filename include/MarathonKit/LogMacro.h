@@ -24,11 +24,11 @@
 #ifndef MARATHON_KIT_LOG_MACRO_H_
 #define MARATHON_KIT_LOG_MACRO_H_
 
-#include "Log.h"
+#include "Core/Log.h"
 
-#define LOGD ::MarathonKit::Log(__FILE__, __LINE__).d
-#define LOGI ::MarathonKit::Log(__FILE__, __LINE__).i
-#define LOGW ::MarathonKit::Log(__FILE__, __LINE__).w
-#define LOGE ::MarathonKit::Log(__FILE__, __LINE__).e
+#define LOGD ::MarathonKit::Core::Log(__FILE__, __LINE__).d
+#define LOGI ::MarathonKit::Core::Log(__FILE__, __LINE__).i
+#define LOGW ::MarathonKit::Core::Log(__FILE__, __LINE__).w
+#define LOGE ::MarathonKit::Core::Log(__FILE__, __LINE__).e
 
 #endif

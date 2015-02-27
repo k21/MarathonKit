@@ -3,30 +3,27 @@ CUSTOM_FLAGS += -Wall -Wextra -Wshadow -Weffc++ -Wconversion
 CUSTOM_FLAGS += -O2 -fno-omit-frame-pointer -g3 -ggdb
 CUSTOM_FLAGS += -I include/MarathonKit
 
-SOURCES := $(wildcard src/*.cpp)
+CORE_SOURCES := $(wildcard src/Core/*.cpp)
 
-OBJS := $(SOURCES:src/%.cpp=build-dir/objs/%.o)
+CORE_OBJS := $(CORE_SOURCES:src/%.cpp=build-dir/objs/%.o)
+
+ALL := libMarathonKitCore.a
 
 
-all: libMarathonKit.a
+all: $(ALL)
 
-libMarathonKit.a: $(OBJS)
+libMarathonKitCore.a: $(CORE_OBJS)
+	mkdir -p `dirname $@`
 	$(AR) $(ARFLAGS) $@ $^
 
--include $(OBJS:.o=.d)
+-include $(CORE_OBJS:.o=.d)
 
-build-dir/objs/%.o: src/%.cpp Makefile | build-dir/objs
+build-dir/objs/%.o: src/%.cpp Makefile
+	mkdir -p `dirname $@`
 	$(CXX) -c -MMD -MP $(CUSTOM_FLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
-
-
-build-dir/objs: | build-dir
-	mkdir build-dir/objs
-
-build-dir:
-	mkdir build-dir
 
 
 .PHONY: all clean
 
 clean:
-	rm -rf build-dir libMarathonKit.a
+	rm -rf build-dir $(ALL)

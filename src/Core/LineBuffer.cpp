@@ -21,14 +21,16 @@
  * from me and not from my employer (Facebook).
  */
 
-#include "FileDescriptor.h"
-#include "LogMacro.h"
-
-#include "LineBuffer.h"
-
 #include <stdexcept>
 
+#include "LogMacro.h"
+
+#include "Core/FileDescriptor.h"
+
+#include "Core/LineBuffer.h"
+
 namespace MarathonKit {
+namespace Core {
 
 using std::shared_ptr;
 
@@ -111,4 +113,4 @@ void LineBuffer::loadChars() {
   }
 }
 
-}
+}}

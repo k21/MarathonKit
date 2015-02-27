@@ -24,8 +24,8 @@
 #ifndef MARATHON_KIT_CORE_H_
 #define MARATHON_KIT_CORE_H_
 
-#include "Log.h"
-#include "Network.h"
-#include "TcpClient.h"
+#include "Core/Log.h"
+#include "Core/Network.h"
+#include "Core/TcpClient.h"
 
 #endif

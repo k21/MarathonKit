@@ -21,57 +21,42 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_FILE_DESCRIPTOR_H_
-#define MARATHON_KIT_FILE_DESCRIPTOR_H_
+#ifndef MARATHON_KIT_CORE_LINE_BUFFER_H_
+#define MARATHON_KIT_CORE_LINE_BUFFER_H_
 
+#include <deque>
+#include <memory>
 #include <string>
 
 namespace MarathonKit {
+namespace Core {
 
-class FileDescriptor {
+class FileDescriptor;
+
+class LineBuffer {
 public:
 
-  enum class Mode : char {
-    STREAM,
-    MESSAGE,
-  };
+  LineBuffer();
+  explicit LineBuffer(const std::shared_ptr<FileDescriptor>& fd);
 
-  FileDescriptor();
-  FileDescriptor(const FileDescriptor& other);
-  FileDescriptor& operator = (const FileDescriptor& other);
-  FileDescriptor(FileDescriptor&& other);
-  FileDescriptor& operator = (FileDescriptor&& other);
-  ~FileDescriptor();
+  bool isInitialized() const;
 
-  void swapWith(FileDescriptor& other);
+  size_t charsReady();
+  char getChar();
 
-  bool isValid() const;
-
-  bool isReadyForReading() const;
-
-  std::string read() const;
-  void write(const std::string& data) const;
-
-  static FileDescriptor createOwnerOf(int fd, Mode mode = Mode::STREAM);
-  static FileDescriptor createCopyOf(int fd, Mode mode = Mode::STREAM);
+  size_t linesReady();
+  std::string getLine();
 
 private:
 
-  FileDescriptor(int fd, Mode mode);
+  void loadChars();
 
-  std::string readStream() const;
-  std::string readMessage() const;
-
-  void writeStream(const std::string& data) const;
-  void writeMessage(const std::string& data) const;
-
-  int mFd;
-  Mode mMode;
+  std::shared_ptr<FileDescriptor> mFd;
+  std::deque<char> mBuffer;
+  std::size_t mLinesReady;
 
 };
 
-void swap(FileDescriptor& fd1, FileDescriptor& fd2);
-
-}
+}}
 
 #endif

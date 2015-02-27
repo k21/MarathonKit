@@ -21,8 +21,8 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_LOG_H_
-#define MARATHON_KIT_LOG_H_
+#ifndef MARATHON_KIT_CORE_LOG_H_
+#define MARATHON_KIT_CORE_LOG_H_
 
 #include <cstring>
 #include <ctime>
@@ -33,6 +33,7 @@
 #include <string>
 
 namespace MarathonKit {
+namespace Core {
 
 class Log {
 public:
@@ -141,6 +142,6 @@ private:
 
 };
 
-}
+}}
 
 #endif

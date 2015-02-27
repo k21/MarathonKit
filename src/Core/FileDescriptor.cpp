@@ -33,9 +33,10 @@
 
 #include "LogMacro.h"
 
-#include "FileDescriptor.h"
+#include "Core/FileDescriptor.h"
 
 namespace MarathonKit {
+namespace Core {
 
 using std::string;
 using std::swap;
@@ -206,4 +207,4 @@ void swap(FileDescriptor& fd1, FileDescriptor& fd2) {
   fd1.swapWith(fd2);
 }
 
-}
+}}

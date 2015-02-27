@@ -1,4 +1,4 @@
 build-dir
-libMarathonKit.a
+libMarathonKit*.a
 
 .*.swp

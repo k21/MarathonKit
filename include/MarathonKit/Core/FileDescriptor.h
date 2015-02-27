@@ -21,58 +21,58 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_DEBUG_MACRO_H_
-#define MARATHON_KIT_DEBUG_MACRO_H_
+#ifndef MARATHON_KIT_CORE_FILE_DESCRIPTOR_H_
+#define MARATHON_KIT_CORE_FILE_DESCRIPTOR_H_
 
-#include "Core/Log.h"
-
-#define DEBUG(...) ::MarathonKit::DebugMacroImpl::debug( \
-    __FILE__, \
-    __LINE__, \
-    #__VA_ARGS__, \
-    __VA_ARGS__);
+#include <string>
 
 namespace MarathonKit {
+namespace Core {
 
-class DebugMacroImpl {
+class FileDescriptor {
 public:
 
-  DebugMacroImpl() = delete;
+  enum class Mode : char {
+    STREAM,
+    MESSAGE,
+  };
 
-  template <typename... Types>
-  static void debug(
-      const std::string& file,
-      int line,
-      const std::string& names,
-      const Types&... objects) {
-    std::ostringstream oss;
-    oss << "(" << names << ") = (";
-    writeObjectsToStream(oss, objects...);
-    oss << ")";
-    Core::Log(file, line).d(oss.str());
-  }
+  FileDescriptor();
+  FileDescriptor(const FileDescriptor& other);
+  FileDescriptor& operator = (const FileDescriptor& other);
+  FileDescriptor(FileDescriptor&& other);
+  FileDescriptor& operator = (FileDescriptor&& other);
+  ~FileDescriptor();
+
+  void swapWith(FileDescriptor& other);
+
+  bool isValid() const;
+
+  bool isReadyForReading() const;
+
+  std::string read() const;
+  void write(const std::string& data) const;
+
+  static FileDescriptor createOwnerOf(int fd, Mode mode = Mode::STREAM);
+  static FileDescriptor createCopyOf(int fd, Mode mode = Mode::STREAM);
 
 private:
 
-  template <typename Type>
-  static void writeObjectsToStream(
-      std::ostringstream& oss,
-      const Type& object) {
-    oss << object;
-  }
+  FileDescriptor(int fd, Mode mode);
 
-  template <typename Type1, typename Type2, typename... Types>
-  static void writeObjectsToStream(
-      std::ostringstream& oss,
-      const Type1& object1,
-      const Type2& object2,
-      const Types&... objects) {
-    oss << object1 << ", ";
-    writeObjectsToStream(oss, object2, objects...);
-  }
+  std::string readStream() const;
+  std::string readMessage() const;
+
+  void writeStream(const std::string& data) const;
+  void writeMessage(const std::string& data) const;
+
+  int mFd;
+  Mode mMode;
 
 };
 
-}
+void swap(FileDescriptor& fd1, FileDescriptor& fd2);
+
+}}
 
 #endif

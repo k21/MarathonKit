@@ -21,45 +21,55 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_NETWORK_H_
-#define MARATHON_KIT_NETWORK_H_
+#include "Core/Network.h"
 
-#include <string>
-
-#include "FileDescriptor.h"
+#include "Core/TcpClient.h"
 
 namespace MarathonKit {
+namespace Core {
 
-class Network {
-public:
+using std::istringstream;
+using std::string;
+using std::swap;
 
-  // Utitlity class, do not instantiate.
-  Network() = delete;
+TcpClient::TcpClient():
+  mFd(),
+  mLineBuffer() {}
 
-  enum class Family {
-    ANY,
-    IP_V4,
-    IP_V6,
-  };
+TcpClient::TcpClient(const std::string& host, const std::string& service):
+  mFd(std::make_shared<FileDescriptor>(
+        Network::createTcpConnection(host, service))),
+  mLineBuffer(mFd) {}
 
-  enum class Protocol {
-    TCP,
-    UDP,
-  };
-
-  enum class Mode {
-    ACTIVE,
-    PASSIVE,
-  };
-
-  static FileDescriptor createTcpConnection(
-      const std::string& host,
-      const std::string& service);
-
-  static FileDescriptor createUdpListener(const std::string& service);
-
-};
-
+bool TcpClient::isConnected() const {
+  return mLineBuffer.isInitialized();
 }
 
-#endif
+void TcpClient::sendLine(const string& line) {
+  sendRaw(line + "\n");
+}
+
+void TcpClient::sendRaw(const string& data) {
+  if (!isConnected()) {
+    throw std::runtime_error("send called on a disconnected TcpSocket");
+  }
+  mFd->write(data);
+}
+
+size_t TcpClient::charsReady() {
+  return mLineBuffer.charsReady();
+}
+
+size_t TcpClient::linesReady() {
+  return mLineBuffer.linesReady();
+}
+
+char TcpClient::getChar() {
+  return mLineBuffer.getChar();
+}
+
+string TcpClient::getLine() {
+  return mLineBuffer.getLine();
+}
+
+}}

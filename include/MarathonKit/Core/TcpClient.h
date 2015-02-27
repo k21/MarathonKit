@@ -21,54 +21,45 @@
  * from me and not from my employer (Facebook).
  */
 
-#include "Network.h"
+#ifndef MARATHON_KIT_CORE_TCP_CLIENT_H_
+#define MARATHON_KIT_CORE_TCP_CLIENT_H_
 
-#include "TcpClient.h"
+#include <string>
+#include <memory>
+
+#include "FileDescriptor.h"
+#include "LineBuffer.h"
 
 namespace MarathonKit {
+namespace Core {
 
-using std::istringstream;
-using std::string;
-using std::swap;
+class TcpClient {
+public:
 
-TcpClient::TcpClient():
-  mFd(),
-  mLineBuffer() {}
+  TcpClient();
+  TcpClient(const std::string& host, const std::string& service);
 
-TcpClient::TcpClient(const std::string& host, const std::string& service):
-  mFd(std::make_shared<FileDescriptor>(
-        Network::createTcpConnection(host, service))),
-  mLineBuffer(mFd) {}
+  bool isConnected() const;
 
-bool TcpClient::isConnected() const {
-  return mLineBuffer.isInitialized();
-}
+  void sendLine(const std::string& line);
+  void sendRaw(const std::string& data);
 
-void TcpClient::sendLine(const string& line) {
-  sendRaw(line + "\n");
-}
+  size_t charsReady();
+  size_t linesReady();
 
-void TcpClient::sendRaw(const string& data) {
-  if (!isConnected()) {
-    throw std::runtime_error("send called on a disconnected TcpSocket");
-  }
-  mFd->write(data);
-}
+  char getChar();
+  std::string getLine();
 
-size_t TcpClient::charsReady() {
-  return mLineBuffer.charsReady();
-}
+private:
 
-size_t TcpClient::linesReady() {
-  return mLineBuffer.linesReady();
-}
+  TcpClient(const TcpClient&) = delete;
+  TcpClient& operator = (const TcpClient&) = delete;
 
-char TcpClient::getChar() {
-  return mLineBuffer.getChar();
-}
+  std::shared_ptr<FileDescriptor> mFd;
+  LineBuffer mLineBuffer;
 
-string TcpClient::getLine() {
-  return mLineBuffer.getLine();
-}
+};
 
-}
+}}
+
+#endif

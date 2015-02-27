@@ -13,8 +13,8 @@ Installation
 ------------
 
 After cloning the repository, run `make` to build a static library.
-If everything goes smoothly, this should create a `libMarathonKit.a` file in the
-root of the repository that you can link with your other sources. To use
+If everything goes smoothly, this should create a `libMarathonKitCore.a` file
+in the root of the repository that you can link with your other sources. To use
 the library in your program, set the include path to `$MARATHON_KIT_DIR/include`
 (where `$MARATHON_KIT_DIR` is the path to the root of the MarathonKit
 repository) and then include its header files using for example
@@ -25,7 +25,8 @@ Features
 
 ### Network communication ###
 
-You can use the `MarathonKit::Network` class to create TCP and UDP connections
+You can use the `MarathonKit::Core::Network`
+class to create TCP and UDP connections
 easily. To create a TCP client, create an instance of the class `TcpClient`. It
 takes the host name and service port of the remote server as parameters of its
 constructor. For example the following code will connect to a local server on
@@ -66,8 +67,9 @@ LOGD("File ", fileName, " is ", fileSize, " bytes long.");
 
 This will print out `File a.txt is 1234 bytes long.`
 
-You can also call the static function `MarathonKit::Log::setLogFile(fileName)`
-to send the log into a file as well or `MarathonKit::Log::setMinLogLevel(level)`
+You can also call the static function
+`MarathonKit::Core::Log::setLogFile(fileName)` to send the log into a file as
+well or `MarathonKit::Core::Log::setMinLogLevel(level)`
 to set the minimum logging level.
 
 In addition to those, you can use the macro `DEBUG` defined in

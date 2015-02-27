@@ -21,41 +21,31 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_LINE_BUFFER_H_
-#define MARATHON_KIT_LINE_BUFFER_H_
+#include <stdexcept>
 
-#include <deque>
-#include <memory>
-#include <string>
+#include "Core/Log.h"
 
 namespace MarathonKit {
+namespace Core {
 
-class FileDescriptor;
+Log::Level Log::mMinLogLevel = Log::Level::DEBUG;
 
-class LineBuffer {
-public:
-
-  LineBuffer();
-  explicit LineBuffer(const std::shared_ptr<FileDescriptor>& fd);
-
-  bool isInitialized() const;
-
-  size_t charsReady();
-  char getChar();
-
-  size_t linesReady();
-  std::string getLine();
-
-private:
-
-  void loadChars();
-
-  std::shared_ptr<FileDescriptor> mFd;
-  std::deque<char> mBuffer;
-  std::size_t mLinesReady;
-
+char Log::mLevelString[4][10] = {
+  "DEBUG",
+  "INFO",
+  "WARN",
+  "ERR",
 };
 
+std::ofstream Log::mLogFile;
+
+void Log::setLogFile(const std::string& fileName) {
+  mLogFile.clear();
+  mLogFile.open(fileName, std::fstream::app);
+
+  if (mLogFile.fail()) {
+    throw std::runtime_error("Could not open the log file");
+  }
 }
 
-#endif
+}}

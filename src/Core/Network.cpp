@@ -33,9 +33,10 @@
 
 #include "LogMacro.h"
 
-#include "Network.h"
+#include "Core/Network.h"
 
 namespace MarathonKit {
+namespace Core {
 
 static int getAiFamily(Network::Family family);
 static int getAiSocketType(Network::Protocol protocol);
@@ -224,4 +225,4 @@ static int getAiFlags(Network::Mode mode) {
   throw std::runtime_error("Invalid mode");
 }
 
-}
+}}

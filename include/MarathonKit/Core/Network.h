@@ -21,44 +21,46 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_TCP_CLIENT_H_
-#define MARATHON_KIT_TCP_CLIENT_H_
+#ifndef MARATHON_KIT_CORE_NETWORK_H_
+#define MARATHON_KIT_CORE_NETWORK_H_
 
 #include <string>
-#include <memory>
 
 #include "FileDescriptor.h"
-#include "LineBuffer.h"
 
 namespace MarathonKit {
+namespace Core {
 
-class TcpClient {
+class Network {
 public:
 
-  TcpClient();
-  TcpClient(const std::string& host, const std::string& service);
+  // Utitlity class, do not instantiate.
+  Network() = delete;
 
-  bool isConnected() const;
+  enum class Family {
+    ANY,
+    IP_V4,
+    IP_V6,
+  };
 
-  void sendLine(const std::string& line);
-  void sendRaw(const std::string& data);
+  enum class Protocol {
+    TCP,
+    UDP,
+  };
 
-  size_t charsReady();
-  size_t linesReady();
+  enum class Mode {
+    ACTIVE,
+    PASSIVE,
+  };
 
-  char getChar();
-  std::string getLine();
+  static FileDescriptor createTcpConnection(
+      const std::string& host,
+      const std::string& service);
 
-private:
-
-  TcpClient(const TcpClient&) = delete;
-  TcpClient& operator = (const TcpClient&) = delete;
-
-  std::shared_ptr<FileDescriptor> mFd;
-  LineBuffer mLineBuffer;
+  static FileDescriptor createUdpListener(const std::string& service);
 
 };
 
-}
+}}
 
 #endif
