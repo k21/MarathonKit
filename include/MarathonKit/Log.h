@@ -24,6 +24,7 @@
 #ifndef MARATHON_KIT_LOG_H_
 #define MARATHON_KIT_LOG_H_
 
+#include <cstring>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
