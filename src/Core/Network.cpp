@@ -165,7 +165,11 @@ static void forEachAddressInfo(
   hints.ai_protocol = getAiProtocol(protocol);
   hints.ai_flags = getAiFlags(mode);
   addrinfo* infos;
-  int rc = getaddrinfo(host.c_str(), service.c_str(), &hints, &infos);
+  int rc = getaddrinfo(
+      host.empty() ? nullptr : host.c_str(),
+      service.c_str(),
+      &hints,
+      &infos);
   if (rc != 0) {
     throw std::runtime_error(gai_strerror(rc));
   }
