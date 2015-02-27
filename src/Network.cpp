@@ -170,7 +170,8 @@ static void forEachAddressInfo(
   }
   try {
     for (addrinfo* info = infos; info != nullptr; info = info->ai_next) {
-      if (!callback(info)) {
+      LoopControl loopControl = callback(info);
+      if (loopControl == LoopControl::BREAK) {
         break;
       }
     }
