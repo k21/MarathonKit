@@ -21,10 +21,36 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_SOUND_H_
-#define MARATHON_KIT_SOUND_H_
+#ifndef MARATHON_KIT_SOUND_SOUND_TRACK_H_
+#define MARATHON_KIT_SOUND_SOUND_TRACK_H_
 
-#include "Sound/SoundFile.h"
-#include "Sound/SoundTrack.h"
+#include <string>
+#include <vector>
+
+namespace MarathonKit {
+namespace Sound {
+
+class SoundTrack {
+public:
+
+  SoundTrack();
+  SoundTrack(const std::vector<double>& samples, int sampleRate);
+  SoundTrack(std::vector<double>&& samples, int sampleRate);
+
+  int getSampleCount() const;
+  int getSampleRate() const;
+
+  double getSample(int i) const;
+
+  static std::vector<SoundTrack> loadFromFile(const std::string& fileName);
+
+private:
+
+  std::vector<double> mSamples;
+  int mSampleRate;
+
+};
+
+}}
 
 #endif
