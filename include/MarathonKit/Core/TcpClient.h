@@ -39,6 +39,11 @@ public:
   TcpClient();
   TcpClient(const std::string& host, const std::string& service);
 
+  TcpClient(TcpClient&& other);
+  TcpClient& operator = (TcpClient&& other);
+
+  void swapWith(TcpClient& other);
+
   bool isConnected() const;
 
   void sendLine(const std::string& line);
@@ -59,6 +64,8 @@ private:
   LineBuffer mLineBuffer;
 
 };
+
+void swap(TcpClient& client1, TcpClient& client2);
 
 }}
 

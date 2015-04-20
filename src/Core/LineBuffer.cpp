@@ -33,6 +33,7 @@ namespace MarathonKit {
 namespace Core {
 
 using std::shared_ptr;
+using std::swap;
 
 LineBuffer::LineBuffer():
   mFd(),
@@ -43,6 +44,24 @@ LineBuffer::LineBuffer(const shared_ptr<FileDescriptor>& fd):
   mFd(fd),
   mBuffer(),
   mLinesReady(0) {}
+
+LineBuffer::LineBuffer(LineBuffer&& other):
+  mFd(),
+  mBuffer(),
+  mLinesReady(0) {
+  swapWith(other);
+}
+
+LineBuffer& LineBuffer::operator = (LineBuffer&& other) {
+  swapWith(other);
+  return *this;
+}
+
+void LineBuffer::swapWith(LineBuffer& other) {
+  swap(mFd, other.mFd);
+  swap(mBuffer, other.mBuffer);
+  swap(mLinesReady, other.mLinesReady);
+}
 
 bool LineBuffer::isInitialized() const {
   return mFd != nullptr;
@@ -111,6 +130,10 @@ void LineBuffer::loadChars() {
       ++mLinesReady;
     }
   }
+}
+
+void swap(LineBuffer& buffer1, LineBuffer& buffer2) {
+  buffer1.swapWith(buffer2);
 }
 
 }}

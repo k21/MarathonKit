@@ -43,6 +43,22 @@ TcpClient::TcpClient(const std::string& host, const std::string& service):
         Network::createTcpConnection(host, service))),
   mLineBuffer(mFd) {}
 
+TcpClient::TcpClient(TcpClient&& other):
+  mFd(),
+  mLineBuffer() {
+  swapWith(other);
+}
+
+TcpClient& TcpClient::operator = (TcpClient&& other) {
+  swapWith(other);
+  return *this;
+}
+
+void TcpClient::swapWith(TcpClient& other) {
+  swap(mFd, other.mFd);
+  swap(mLineBuffer, other.mLineBuffer);
+}
+
 bool TcpClient::isConnected() const {
   return mLineBuffer.isInitialized();
 }
@@ -72,6 +88,10 @@ char TcpClient::getChar() {
 
 string TcpClient::getLine() {
   return mLineBuffer.getLine();
+}
+
+void swap(TcpClient& client1, TcpClient& client2) {
+  client1.swapWith(client2);
 }
 
 }}

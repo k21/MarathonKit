@@ -39,6 +39,11 @@ public:
   LineBuffer();
   explicit LineBuffer(const std::shared_ptr<FileDescriptor>& fd);
 
+  LineBuffer(LineBuffer&& other);
+  LineBuffer& operator = (LineBuffer&& other);
+
+  void swapWith(LineBuffer& other);
+
   bool isInitialized() const;
 
   size_t charsReady();
@@ -59,6 +64,8 @@ private:
   std::size_t mLinesReady;
 
 };
+
+void swap(LineBuffer& buffer1, LineBuffer& buffer2);
 
 }}
 
