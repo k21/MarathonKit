@@ -21,6 +21,7 @@
  * from me and not from my employer (Facebook).
  */
 
+#include <cmath>
 #include <cstring>
 #include <stdexcept>
 
@@ -68,6 +69,24 @@ double SoundTrack::getSample(int i) const {
   return mSamples[(std::size_t)i];
 }
 
+double SoundTrack::getSampleWithoutThrowing(int i) const {
+  if (i < 0 || (std::size_t)i >= mSamples.size()) {
+    return 0.0;
+  }
+  return mSamples[(std::size_t)i];
+}
+
+double SoundTrack::getDuration() const {
+  checkSampleRateKnown();
+  return (double)mSamples.size() / mSampleRate;
+}
+
+int SoundTrack::getSampleIndex(double time) const {
+  checkSampleRateKnown();
+  double index = time * mSampleRate;
+  return (int)std::round(index);
+}
+
 std::vector<SoundTrack> SoundTrack::loadFromFile(const std::string& fileName) {
   SoundFile file(fileName);
   std::vector<std::vector<double>> channels;
@@ -88,6 +107,12 @@ std::vector<SoundTrack> SoundTrack::loadFromFile(const std::string& fileName) {
     tracks.emplace_back(std::move(samples), file.getSampleRate());
   }
   return tracks;
+}
+
+void SoundTrack::checkSampleRateKnown() const {
+  if (mSampleRate == 0) {
+    throw std::runtime_error("Unknown sample rate");
+  }
 }
 
 }}

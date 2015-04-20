@@ -41,10 +41,16 @@ public:
   int getSampleRate() const;
 
   double getSample(int i) const;
+  double getSampleWithoutThrowing(int i) const;
+
+  double getDuration() const;
+  int getSampleIndex(double time) const;
 
   static std::vector<SoundTrack> loadFromFile(const std::string& fileName);
 
 private:
+
+  void checkSampleRateKnown() const;
 
   std::vector<double> mSamples;
   int mSampleRate;
