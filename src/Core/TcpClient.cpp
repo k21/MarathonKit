@@ -21,6 +21,8 @@
  * from me and not from my employer (Facebook).
  */
 
+#include <stdexcept>
+
 #include "Core/Network.h"
 
 #include "Core/TcpClient.h"
