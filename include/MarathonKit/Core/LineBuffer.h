@@ -49,6 +49,9 @@ public:
 
 private:
 
+  LineBuffer(const LineBuffer&) = delete;
+  LineBuffer& operator = (const LineBuffer&) = delete;
+
   void loadChars();
 
   std::shared_ptr<FileDescriptor> mFd;
