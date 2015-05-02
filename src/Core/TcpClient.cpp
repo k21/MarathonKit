@@ -39,8 +39,7 @@ TcpClient::TcpClient():
   mLineBuffer() {}
 
 TcpClient::TcpClient(const std::string& host, const std::string& service):
-  mFd(std::make_shared<FileDescriptor>(
-        Network::createTcpConnection(host, service))),
+  mFd(Network::createTcpConnection(host, service)),
   mLineBuffer(mFd) {}
 
 TcpClient::TcpClient(TcpClient&& other):

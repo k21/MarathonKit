@@ -21,31 +21,38 @@
  * from me and not from my employer (Facebook).
  */
 
-#ifndef MARATHON_KIT_CORE_FILE_DESCRIPTOR_H_
-#define MARATHON_KIT_CORE_FILE_DESCRIPTOR_H_
+#ifndef MARATHON_KIT_CORE_MESSAGE_FILE_DESCRIPTOR_H_
+#define MARATHON_KIT_CORE_MESSAGE_FILE_DESCRIPTOR_H_
 
+#include <memory>
 #include <string>
+
+#include "FileDescriptor.h"
 
 namespace MarathonKit {
 namespace Core {
 
-class FileDescriptor {
+class MessageFileDescriptor : public FileDescriptor {
 public:
 
-  virtual ~FileDescriptor() {}
+  virtual ~MessageFileDescriptor();
 
-  virtual bool isReadyForReading() const = 0;
+  virtual bool isReadyForReading() const;
 
-  virtual std::string read() const = 0;
-  virtual void write(const std::string& data) const = 0;
+  virtual std::string read() const;
+  virtual void write(const std::string& data) const;
 
-protected:
-
-  static bool isReadyForReading(int fd);
+  static std::unique_ptr<MessageFileDescriptor> createOwnerOf(int fd);
+  static std::unique_ptr<MessageFileDescriptor> createCopyOf(int fd);
 
 private:
 
-  FileDescriptor& operator = (const FileDescriptor&) = delete;
+  MessageFileDescriptor(int fd);
+
+  MessageFileDescriptor(const MessageFileDescriptor&) = delete;
+  MessageFileDescriptor& operator = (const MessageFileDescriptor&) = delete;
+
+  const int mFd;
 
 };
 

@@ -38,6 +38,8 @@
 namespace MarathonKit {
 namespace Core {
 
+using std::unique_ptr;
+
 static int getAiFamily(Network::Family family);
 static int getAiSocketType(Network::Protocol protocol);
 static int getAiProtocol(Network::Protocol protocol);
@@ -56,11 +58,11 @@ static void forEachAddressInfo(
     Network::Mode mode,
     std::function<LoopControl(const addrinfo*)> callback);
 
-FileDescriptor Network::createTcpConnection(
+unique_ptr<StreamFileDescriptor> Network::createTcpConnection(
   const std::string& host,
   const std::string& service) {
   LOGI("Trying to connect to ", host, ":", service, " using TCP...");
-  FileDescriptor fd;
+  unique_ptr<StreamFileDescriptor> fd;
   bool anyTried = false;
   forEachAddressInfo(
       host,
@@ -90,24 +92,23 @@ FileDescriptor Network::createTcpConnection(
           close(socketFd);
           return LoopControl::CONTINUE;
         }
-        fd = FileDescriptor::createOwnerOf(
-            socketFd,
-            FileDescriptor::Mode::STREAM);
+        fd = StreamFileDescriptor::createOwnerOf(socketFd);
         return LoopControl::BREAK;
       });
   if (!anyTried) {
     LOGE("Unknown host ", host, ":", service);
   }
-  if (!fd.isValid()) {
+  if (fd == nullptr) {
     throw std::runtime_error("Could not connect to " + host + ":" + service);
   }
   LOGI("Connection attempt to ", host, ":", service, " was successful");
   return std::move(fd);
 }
 
-FileDescriptor Network::createUdpListener(const std::string& service) {
+unique_ptr<MessageFileDescriptor> Network::createUdpListener(
+    const std::string& service) {
   LOGI("Trying to listen for UDP datagrams on service port ", service, "...");
-  FileDescriptor fd;
+  unique_ptr<MessageFileDescriptor> fd;
   bool anyTried = false;
   forEachAddressInfo(
       /* host = */ "",
@@ -136,15 +137,13 @@ FileDescriptor Network::createUdpListener(const std::string& service) {
           close(socketFd);
           return LoopControl::CONTINUE;
         }
-        fd = FileDescriptor::createOwnerOf(
-            socketFd,
-            FileDescriptor::Mode::MESSAGE);
+        fd = MessageFileDescriptor::createOwnerOf(socketFd);
         return LoopControl::BREAK;
       });
   if (!anyTried) {
     LOGE("Unknown service port ", service);
   }
-  if (!fd.isValid()) {
+  if (fd == nullptr) {
     throw std::runtime_error("Could not listen on service port " + service);
   }
   LOGI("Successfully listening on service port ", service);

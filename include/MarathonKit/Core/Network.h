@@ -24,9 +24,11 @@
 #ifndef MARATHON_KIT_CORE_NETWORK_H_
 #define MARATHON_KIT_CORE_NETWORK_H_
 
+#include <memory>
 #include <string>
 
-#include "FileDescriptor.h"
+#include "StreamFileDescriptor.h"
+#include "MessageFileDescriptor.h"
 
 namespace MarathonKit {
 namespace Core {
@@ -53,11 +55,12 @@ public:
     PASSIVE,
   };
 
-  static FileDescriptor createTcpConnection(
+  static std::unique_ptr<StreamFileDescriptor> createTcpConnection(
       const std::string& host,
       const std::string& service);
 
-  static FileDescriptor createUdpListener(const std::string& service);
+  static std::unique_ptr<MessageFileDescriptor> createUdpListener(
+      const std::string& service);
 
 };
 
