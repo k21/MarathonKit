@@ -18,7 +18,7 @@ GMOCK_FLAGS := $(COMMON_FLAGS) -I $(GMOCK_DIR)
 GMOCK_SOURCES := $(GMOCK_DIR)/gmock-gtest-all.cc $(GMOCK_DIR)/gmock_main.cc
 GMOCK_OBJS := $(GMOCK_SOURCES:$(GMOCK_DIR)/%.cc=build-dir/gmock-objs/%.o)
 
-TEST_FLAGS := $(CUSTOM_FLAGS) -isystem $(GMOCK_DIR)
+TEST_FLAGS := $(CUSTOM_FLAGS) -isystem $(GMOCK_DIR) -isystem test/mocks
 TEST_LINK_FLAGS := -lsndfile
 TEST_SOURCES := $(wildcard test/*.cpp)
 TEST_OBJS := $(TEST_SOURCES:test/%.cpp=build-dir/test-objs/%.o)
