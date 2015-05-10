@@ -22,6 +22,7 @@
  */
 
 #include <memory>
+#include <utility>
 
 #include <gmock/gmock.h>
 
@@ -32,6 +33,7 @@
 using MarathonKit::Core::LineBuffer;
 using std::make_shared;
 using std::shared_ptr;
+using std::swap;
 using testing::InSequence;
 using testing::Return;
 
@@ -255,4 +257,110 @@ TEST(LineBufferTest, supportsMixedReadingModes) {
 
   EXPECT_EQ(0, lineBuffer.linesReady());
   EXPECT_EQ(0, lineBuffer.charsReady());
+}
+
+TEST(LineBufferTest, isSwappable) {
+  shared_ptr<MockFileDescriptor> fd1 = make_shared<MockFileDescriptor>();
+  shared_ptr<MockFileDescriptor> fd2 = make_shared<MockFileDescriptor>();
+  LineBuffer lineBuffer1(fd1);
+  LineBuffer lineBuffer2(fd2);
+
+  {
+    InSequence seq;
+
+    EXPECT_CALL(*fd1, isReadyForReading())
+      .WillOnce(Return(true));
+    EXPECT_CALL(*fd1, read())
+      .WillOnce(Return("abcd\nef"));
+    EXPECT_CALL(*fd1, isReadyForReading())
+      .WillRepeatedly(Return(false));
+  }
+
+  {
+    InSequence seq;
+
+    EXPECT_CALL(*fd2, isReadyForReading())
+      .WillOnce(Return(true));
+    EXPECT_CALL(*fd2, read())
+      .WillOnce(Return("ijkl\nmn"));
+    EXPECT_CALL(*fd2, isReadyForReading())
+      .WillRepeatedly(Return(false));
+  }
+
+  ASSERT_GT(lineBuffer1.linesReady(), 0);
+  EXPECT_EQ("abcd", lineBuffer1.getLine());
+  EXPECT_EQ(0, lineBuffer1.linesReady());
+
+  ASSERT_GT(lineBuffer2.linesReady(), 0);
+  EXPECT_EQ("ijkl", lineBuffer2.getLine());
+  EXPECT_EQ(0, lineBuffer2.linesReady());
+
+  swap(lineBuffer1, lineBuffer2);
+
+  {
+    InSequence seq;
+
+    EXPECT_CALL(*fd1, isReadyForReading())
+      .WillOnce(Return(true));
+    EXPECT_CALL(*fd1, read())
+      .WillOnce(Return("gh\n"));
+    EXPECT_CALL(*fd1, isReadyForReading())
+      .WillRepeatedly(Return(false));
+  }
+
+  {
+    InSequence seq;
+
+    EXPECT_CALL(*fd2, isReadyForReading())
+      .WillOnce(Return(true));
+    EXPECT_CALL(*fd2, read())
+      .WillOnce(Return("op\n"));
+    EXPECT_CALL(*fd2, isReadyForReading())
+      .WillRepeatedly(Return(false));
+  }
+
+  ASSERT_GT(lineBuffer1.linesReady(), 0);
+  EXPECT_EQ("mnop", lineBuffer1.getLine());
+  EXPECT_EQ(0, lineBuffer1.linesReady());
+
+  ASSERT_GT(lineBuffer2.linesReady(), 0);
+  EXPECT_EQ("efgh", lineBuffer2.getLine());
+  EXPECT_EQ(0, lineBuffer2.linesReady());
+}
+
+TEST(LineBufferTest, isMovable) {
+  shared_ptr<MockFileDescriptor> fd = make_shared<MockFileDescriptor>();
+  LineBuffer lineBuffer1(fd), lineBuffer2;
+
+  {
+    InSequence seq;
+
+    EXPECT_CALL(*fd, isReadyForReading())
+      .WillOnce(Return(true));
+    EXPECT_CALL(*fd, read())
+      .WillOnce(Return("abcd\nef"));
+    EXPECT_CALL(*fd, isReadyForReading())
+      .WillRepeatedly(Return(false));
+  }
+
+  ASSERT_GT(lineBuffer1.linesReady(), 0);
+  EXPECT_EQ("abcd", lineBuffer1.getLine());
+  EXPECT_EQ(0, lineBuffer1.linesReady());
+
+  lineBuffer2 = std::move(lineBuffer1);
+
+  {
+    InSequence seq;
+
+    EXPECT_CALL(*fd, isReadyForReading())
+      .WillOnce(Return(true));
+    EXPECT_CALL(*fd, read())
+      .WillOnce(Return("gh\n"));
+    EXPECT_CALL(*fd, isReadyForReading())
+      .WillRepeatedly(Return(false));
+  }
+
+  ASSERT_GT(lineBuffer2.linesReady(), 0);
+  EXPECT_EQ("efgh", lineBuffer2.getLine());
+  EXPECT_EQ(0, lineBuffer2.linesReady());
 }
