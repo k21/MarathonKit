@@ -1,5 +1,18 @@
-build-dir
-libMarathonKit*.a
-MarathonKitTest
+/libMarathonKit*.a
+/MarathonKit*Test
+/libgmock.a
 
 .*.swp
+*~
+
+*.o
+.deps
+.dirstamp
+/Makefile
+/Makefile.in
+/aclocal.m4
+/autom4te.cache
+/build-aux
+/config.log
+/config.status
+/configure
