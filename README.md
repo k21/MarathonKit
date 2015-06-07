@@ -12,13 +12,22 @@ functionality that might be useful.
 Installation
 ------------
 
-After cloning the repository, run `make` to build a static library.
-If everything goes smoothly, this should create a `libMarathonKitCore.a` file
-in the root of the repository that you can link with your other sources. To use
+If you are using the source archive, unpack its contents and
+in the unpacked directory run `./configure` and `make`.
+If everything goes smoothly, this will create a `libMarathonKitCore.a` file
+which you can link with your other sources. To use
 the library in your program, set the include path to `$MARATHON_KIT_DIR/include`
-(where `$MARATHON_KIT_DIR` is the path to the root of the MarathonKit
-repository) and then include its header files using for example
-`#include <MarathonKit/Core.h>`.
+(where `$MARATHON_KIT_DIR` is the path to the unpacked directory) and then
+include its header files using for example `#include <MarathonKit/Core.h>`.
+
+If you have cloned the MarathonKit repository, you will need automake, autoconf
+and the autoconf-archive to create the configuration files. You can do so by
+running `autoreconf --install` in the root of the repository. After that you
+can follow the steps from the previous paragraph (run `./configure` and `make`).
+
+If you want to modify MarathonKit and you have GCC or a compatible compiler,
+it is recommended to run `./dev-configure` instead of `./configure`.
+It will enable some extra warnings when you build the library.
 
 Features
 --------
