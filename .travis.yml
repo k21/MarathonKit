@@ -1,0 +1,17 @@
+language: cpp
+
+sudo: required
+
+compiler:
+  - clang
+  - gcc
+
+before_install:
+  - ./scripts/travis-before-install.sh
+
+script:
+  - autoreconf --install
+  - CPPFLAGS='-Werror' ./configure --enable-sound --enable-warnings
+  - make
+  - ./run-tests
+  - make distcheck
