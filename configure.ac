@@ -2,6 +2,7 @@ AC_INIT([MarathonKit], [0.0.1-dev])
 AC_CONFIG_SRCDIR([./LICENSE])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+AM_SILENT_RULES([yes])
 
 AC_PROG_CXX
 AC_LANG([C++])
