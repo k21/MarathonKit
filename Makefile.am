@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 baseincludedir = $(includedir)/MarathonKit
 coreincludedir = $(includedir)/MarathonKit/Core
 soundincludedir = $(includedir)/MarathonKit/Sound

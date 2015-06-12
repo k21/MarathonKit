@@ -1,6 +1,7 @@
 AC_INIT([MarathonKit], [0.0.1-dev])
 AC_CONFIG_SRCDIR([./LICENSE])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 
