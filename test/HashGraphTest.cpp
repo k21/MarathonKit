@@ -167,11 +167,59 @@ TEST(HashGraphTest, removingNodeRemovesItsEdges) {
   EXPECT_FALSE(graph.hasEdge(2, 3));
 }
 
+template <typename Set, typename Element>
+void testSet(Set s, Element e1, Element e2) {
+  EXPECT_EQ(0, s.size());
+  EXPECT_TRUE(s.insert(e1).second);
+  EXPECT_EQ(1, s.size());
+  EXPECT_FALSE(s.insert(e1).second);
+  EXPECT_EQ(1, s.size());
+  EXPECT_TRUE(s.insert(e2).second);
+  EXPECT_EQ(2, s.size());
+  EXPECT_FALSE(s.insert(e2).second);
+  EXPECT_EQ(2, s.size());
+  EXPECT_TRUE(s.erase(e1));
+  EXPECT_EQ(1, s.size());
+  EXPECT_FALSE(s.erase(e1));
+  EXPECT_EQ(1, s.size());
+  EXPECT_TRUE(s.erase(e2));
+  EXPECT_EQ(0, s.size());
+  EXPECT_FALSE(s.erase(e2));
+  EXPECT_EQ(0, s.size());
+}
+
+template <typename Map, typename Key, typename Value>
+void testMap(Map m, Key k1, Value v1, Key k2, Value v2) {
+  EXPECT_EQ(0, m.size());
+  m[k1] = v2;
+  EXPECT_EQ(v2, m[k1]);
+  EXPECT_EQ(1, m.size());
+  m[k1] = v1;
+  EXPECT_EQ(v1, m[k1]);
+  EXPECT_EQ(1, m.size());
+  m[k2] = v1;
+  EXPECT_EQ(v1, m[k2]);
+  EXPECT_EQ(2, m.size());
+  m[k2] = v2;
+  EXPECT_EQ(v2, m[k2]);
+  EXPECT_EQ(2, m.size());
+  EXPECT_TRUE(m.erase(k1));
+  EXPECT_EQ(1, m.size());
+  EXPECT_FALSE(m.erase(k1));
+  EXPECT_EQ(1, m.size());
+  EXPECT_TRUE(m.erase(k2));
+  EXPECT_EQ(0, m.size());
+  EXPECT_FALSE(m.erase(k2));
+  EXPECT_EQ(0, m.size());
+}
+
 TEST(HashGraphTest, createNodeSetsAndMaps) {
   HashGraph<int> graph;
 
   auto s = graph.newEmptyNodeSet();
   auto m = graph.newEmptyNodeMap<std::string>();
+  testSet(s, 4, 7);
+  testMap(m, 4, "four", 7, "seven");
 }
 
 TEST(HashGraphTest, canUseCustomEquality) {
@@ -235,6 +283,8 @@ TEST(HashGraphTest, canUseCustomEquality) {
 
   auto s = graph.newEmptyNodeSet();
   auto m = graph.newEmptyNodeMap<std::string>();
+  testSet(s, 4, 7);
+  testMap(m, 4, "four", 7, "seven");
 }
 
 TEST(HashGraphTest, canUseCustomObject) {
@@ -283,4 +333,6 @@ TEST(HashGraphTest, canUseCustomObject) {
 
   auto s = graph.newEmptyNodeSet();
   auto m = graph.newEmptyNodeMap<std::string>();
+  testSet(s, Node(4), Node(7));
+  testMap(m, Node(4), "four", Node(7), "seven");
 }
