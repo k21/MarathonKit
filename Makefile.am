@@ -23,6 +23,7 @@ baseinclude_HEADERS = \
 	include/MarathonKit/Sound.h
 coreinclude_HEADERS = \
 	include/MarathonKit/Core/FileDescriptor.h \
+	include/MarathonKit/Core/HashGraph.h \
 	include/MarathonKit/Core/LineBuffer.h \
 	include/MarathonKit/Core/Log.h \
 	include/MarathonKit/Core/MessageFileDescriptor.h \
@@ -62,6 +63,7 @@ MarathonKitCoreTest_CPPFLAGS = \
 	-isystem $(srcdir)/third-party/gmock-1.7.0/fused-src
 MarathonKitCoreTest_LDADD = libgmock.a libMarathonKitCore.a
 MarathonKitCoreTest_SOURCES = \
+	test/HashGraphTest.cpp \
 	test/LineBufferTest.cpp \
 	test/mocks/MockFileDescriptor.h
 
