@@ -3,12 +3,12 @@ language: cpp
 sudo: required
 dist: trusty
 
-compiler:
-  - clang
-  - gcc
-
 before_install:
   - ./scripts/travis-before-install.sh
+  - export CC=~/bin/cc
+  - export CXX=~/bin/cxx
+  - ${CC} --version
+  - ${CXX} --version
 
 script:
   - autoreconf --install
@@ -16,3 +16,20 @@ script:
   - make
   - ./run-tests
   - make distcheck
+
+matrix:
+  include:
+    - compiler: clang
+      env: CLANG_VERSION=3.5
+    - compiler: clang
+      env: CLANG_VERSION=3.6
+    - compiler: clang
+      env: CLANG_VERSION=3.7
+    - compiler: clang
+      env: CLANG_VERSION=3.8
+    - compiler: gcc
+      env: GCC_VERSION=4.8
+    - compiler: gcc
+      env: GCC_VERSION=4.9
+    - compiler: gcc
+      env: GCC_VERSION=5
