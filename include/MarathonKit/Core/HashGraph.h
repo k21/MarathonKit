@@ -27,6 +27,7 @@
 #include <cassert>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace MarathonKit {
 namespace Core {
@@ -38,10 +39,20 @@ template <
 class HashGraph {
 public:
 
+  class EdgeHash;
+  class EdgeEqual;
+
+  using Edge = std::pair<Node, Node>;
+
   using NodeSet = std::unordered_set<Node, NodeHash, NodeEqual>;
 
   template <typename Value>
   using NodeMap = std::unordered_map<Node, Value, NodeHash, NodeEqual>;
+
+  using EdgeSet = std::unordered_set<Edge, EdgeHash, EdgeEqual>;
+
+  template <typename Value>
+  using EdgeMap = std::unordered_map<Edge, Value, EdgeHash, EdgeEqual>;
 
   HashGraph(
       const NodeHash& nodeHash = NodeHash(),
@@ -152,11 +163,59 @@ public:
     return NodeMap<Value>({}, nodes.hash_function(), nodes.key_eq());
   }
 
+  EdgeSet newEmptyEdgeSet() const {
+    return EdgeSet(
+        {},
+        EdgeHash(nodes.hash_function()),
+        EdgeEqual(nodes.key_eq()));
+  }
+
+  template <typename Value>
+  EdgeMap<Value> newEmptyEdgeMap() const {
+    return EdgeMap<Value>(
+        {},
+        EdgeHash(nodes.hash_function()),
+        EdgeEqual(nodes.key_eq()));
+  }
+
 private:
 
   NodeSet nodes;
   NodeMap<NodeSet> edges;
   NodeMap<NodeSet> reverseEdges;
+
+};
+
+template <typename Node, typename NodeHash, typename NodeEqual>
+class HashGraph<Node, NodeHash, NodeEqual>::EdgeHash {
+public:
+
+  EdgeHash(NodeHash nodeHash_): nodeHash(nodeHash_) {}
+
+  size_t operator () (const Edge& edge) const {
+    return 28447 * nodeHash(edge.first) + nodeHash(edge.second) + 13;
+  }
+
+private:
+
+  NodeHash nodeHash;
+
+};
+
+template <typename Node, typename NodeHash, typename NodeEqual>
+class HashGraph<Node, NodeHash, NodeEqual>::EdgeEqual {
+public:
+
+  EdgeEqual(NodeEqual nodeEqual_): nodeEqual(nodeEqual_) {}
+
+  bool operator () (const Edge& edge1, const Edge& edge2) const {
+    return nodeEqual(edge1.first, edge2.first) &&
+      nodeEqual(edge1.second, edge2.second);
+  }
+
+private:
+
+  NodeEqual nodeEqual;
 
 };
 

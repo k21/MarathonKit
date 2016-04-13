@@ -22,12 +22,14 @@
  */
 
 #include <string>
+#include <utility>
 
 #include <gmock/gmock.h>
 
 #include "Core/HashGraph.h"
 
 using MarathonKit::Core::HashGraph;
+using std::make_pair;
 using std::unordered_set;
 
 TEST(HashGraphTest, canAddAndRemoveNodes) {
@@ -220,6 +222,11 @@ TEST(HashGraphTest, createNodeSetsAndMaps) {
   auto m = graph.newEmptyNodeMap<std::string>();
   testSet(s, 4, 7);
   testMap(m, 4, "four", 7, "seven");
+
+  auto es = graph.newEmptyEdgeSet();
+  auto em = graph.newEmptyEdgeMap<std::string>();
+  testSet(es, make_pair(4, 5), make_pair(6, 7));
+  testMap(em, make_pair(4, 5) , "four", make_pair(6, 7), "seven");
 }
 
 TEST(HashGraphTest, canUseCustomEquality) {
@@ -285,6 +292,11 @@ TEST(HashGraphTest, canUseCustomEquality) {
   auto m = graph.newEmptyNodeMap<std::string>();
   testSet(s, 4, 7);
   testMap(m, 4, "four", 7, "seven");
+
+  auto es = graph.newEmptyEdgeSet();
+  auto em = graph.newEmptyEdgeMap<std::string>();
+  testSet(es, make_pair(4, 5), make_pair(6, 7));
+  testMap(em, make_pair(4, 5) , "four", make_pair(6, 7), "seven");
 }
 
 TEST(HashGraphTest, canUseCustomObject) {
@@ -335,4 +347,12 @@ TEST(HashGraphTest, canUseCustomObject) {
   auto m = graph.newEmptyNodeMap<std::string>();
   testSet(s, Node(4), Node(7));
   testMap(m, Node(4), "four", Node(7), "seven");
+
+  auto es = graph.newEmptyEdgeSet();
+  auto em = graph.newEmptyEdgeMap<std::string>();
+  testSet(es, make_pair(Node(4), Node(5)), make_pair(Node(6), Node(7)));
+  testMap(
+      em,
+      make_pair(Node(4), Node(5)), "four",
+      make_pair(Node(6), Node(7)), "seven");
 }
