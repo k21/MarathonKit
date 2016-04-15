@@ -102,7 +102,7 @@ unique_ptr<StreamFileDescriptor> Network::createTcpConnection(
     throw std::runtime_error("Could not connect to " + host + ":" + service);
   }
   LOGI("Connection attempt to ", host, ":", service, " was successful");
-  return std::move(fd);
+  return fd;
 }
 
 unique_ptr<MessageFileDescriptor> Network::createUdpListener(
@@ -147,7 +147,7 @@ unique_ptr<MessageFileDescriptor> Network::createUdpListener(
     throw std::runtime_error("Could not listen on service port " + service);
   }
   LOGI("Successfully listening on service port ", service);
-  return std::move(fd);
+  return fd;
 }
 
 static void forEachAddressInfo(
