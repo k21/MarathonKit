@@ -19,17 +19,29 @@ script:
 
 matrix:
   include:
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: CLANG_VERSION=3.5
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: CLANG_VERSION=3.6
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: CLANG_VERSION=3.7
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: CLANG_VERSION=3.8
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: GCC_VERSION=4.8
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: GCC_VERSION=4.9
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: GCC_VERSION=5
+
+    - os: osx
+      compiler: clang
+    - os: osx
+      compiler: gcc
